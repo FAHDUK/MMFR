@@ -1,0 +1,427 @@
+/* FRMM pages: builds each pond (UK, US, Europe, Asia, Crypto), the Trends page and the home page */
+(function () {
+  'use strict';
+
+  var F = window.FRMM, $ = F.$, esc = F.esc, each = F.each;
+  var page = F.page;
+  var main = $('main');
+
+  /* ---------- page settings ---------- */
+  var P = {
+    uk: {
+      num: '01', name: 'United Kingdom', title: 'The UK', seal: 'LIVE FROM LONDON',
+      lede: 'Sterling, the big London names and the news that moves them. UK shares are followed through the MSCI UK fund and London giants listed in New York, so prices are in dollars.',
+      tiles: ['EWU', 'SHEL', 'AZN', 'HSBC'], list: ['BP', 'UL', 'GSK', 'DEO', 'RIO', 'BTI', 'BCS', 'LYG', 'VOD', 'NGG', 'NWG', 'RELX'],
+      hours: ['LSE', 'NYSE'], fx: ['USD', 'EUR', 'JPY', 'CHF'], official: true,
+      feeds: ['bbc-biz', 'bbc-eco', 'gdn-biz', 'sky', 'ft-uk', 'boe', 'ons', 'hmt'],
+      news: { tags: ['uk'], re: /\bUK\b|Britain|British|London|Bank of England|FTSE|sterling|Starmer|Reeves|Treasury|\bNHS\b/ },
+      listTitle: 'The London crowd', listSub: 'UK giants, priced in US dollars in New York',
+      note: 'Direct London Stock Exchange prices are a paid data feed. Until then, the UK is followed through the iShares MSCI UK fund and UK companies listed in New York (ADRs).',
+      quips: ['Cuppa first, then the markets.', 'Mind the gap between headlines and prices.', 'Tea, biscuits and basis points.']
+    },
+    us: {
+      num: '02', name: 'United States', title: 'The US', seal: 'STRAIGHT FROM NEW YORK',
+      lede: 'Wall Street in one glance: the big indices, the household names, and the gold, oil, dollar and bond moves underneath them.',
+      tiles: ['SPY', 'QQQ', 'DIA', 'IWM'], list: ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'JPM', 'V'],
+      extra: { title: 'Other tides', sub: 'Gold, oil, the dollar and bonds', list: ['GLD', 'USO', 'UUP', 'TLT'] },
+      hours: ['NYSE', 'LSE'], fx: ['USD', 'CAD'], feeds: ['cnbc', 'cnbc-eco', 'ft-mkts'],
+      news: { tags: ['us'], re: /Wall Street|\bU\.?S\.?\b|Fed\b|Trump|Nasdaq|S&P|\bDow\b|Treasury|American|Washington/ },
+      listTitle: 'The big fish', listSub: 'Household names on Wall Street',
+      note: 'Shares and funds trade 14:30 to 21:00 UK time. Outside those hours you see the last close.',
+      quips: ['Big stocks, bigger opinions.', 'Yes, that is a lot of zeros.', 'Stars, stripes and stock tickers.']
+    },
+    europe: {
+      num: '03', name: 'Europe', title: 'Europe', seal: 'FROM THE CONTINENT',
+      lede: 'Our nearest neighbours: the euro area, Germany, France and friends, plus the continental companies everyone has heard of.',
+      tiles: ['FEZ', 'VGK', 'EWG', 'EWQ'], list: ['EWI', 'EWP', 'EWL', 'EWN', 'ASML', 'SAP', 'NVO', 'TTE', 'SNY'],
+      hours: ['XETRA', 'LSE', 'NYSE'], fx: ['EUR', 'CHF'], feeds: ['ft-mkts', 'gdn-eco', 'economist', 'bbc-biz'],
+      news: { tags: [], re: /Europe|eurozone|\bEU\b|\bECB\b|Germany|German|France|French|Italy|Spain|Brussels|\bDAX\b|Lagarde|euro\b/ },
+      listTitle: 'Around the continent', listSub: 'Countries and companies, priced in US dollars in New York',
+      note: 'European markets are followed through US-listed funds and company listings (ADRs), so prices are in dollars and move with New York hours.',
+      quips: ['Bonjour, hallo, ciao.', 'Twenty-odd currencies, one very busy octopus.', 'Do not mention the queue at passport control.']
+    },
+    asia: {
+      num: '04', name: 'Asia-Pacific', title: 'Asia', seal: 'EAST OF THE SUN',
+      lede: 'Tokyo, Hong Kong, Shanghai, Mumbai and beyond: the country funds, and the chipmakers and carmakers that sell to the world.',
+      tiles: ['EWJ', 'FXI', 'EWH', 'INDA'], list: ['MCHI', 'EWY', 'EWT', 'EWS', 'EWA', 'TSM', 'BABA', 'SONY', 'TM', 'INFY', 'PDD'],
+      hours: ['TSE', 'HKEX', 'NYSE'], fx: ['JPY', 'CNY', 'INR', 'AUD'], feeds: ['ft-mkts', 'economist', 'cnbc'],
+      news: { tags: [], re: /Asia|China|Chinese|Japan|Japanese|Hong Kong|India|Nikkei|\byuan\b|\byen\b|Korea|Taiwan|TSMC|Singapore|Australia|Beijing|Tokyo/ },
+      listTitle: 'Across the region', listSub: 'Country funds and company giants, priced in US dollars in New York',
+      note: 'Asian markets are followed through US-listed funds and company listings, so prices are in dollars and move with New York hours.',
+      quips: ['Follow the sun, follow the yen.', 'Chips with everything.', 'Konnichiwa, Hong Kong and hello, Mumbai.']
+    }
+  };
+
+  /* ---------- small builders ---------- */
+  function sparkPath(vals, w, h) {
+    if (!vals || vals.length < 2) return '';
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals), sp = (max - min) || 1;
+    var pts = vals.map(function (v, i) { return [(i / (vals.length - 1)) * w, h - 3 - ((v - min) / sp) * (h - 6)]; });
+    return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(2); }).join(' ');
+  }
+  function tileHTML(sym) {
+    return '<div class="tile is-loading" data-sym="' + sym + '"><div class="tile__top"><b>' + esc(F.symName(sym)) + '</b><span class="chip">' + sym + '</span></div>' +
+      '<div class="tile__price price">--</div><div class="tile__bottom"><span class="range" title="Where today\'s price sits between the day low and high"><i></i></span><span class="pct flat">--</span></div></div>';
+  }
+  function rowHTML(sym) {
+    return '<div class="row is-loading" data-sym="' + sym + '"><div class="row__id"><b>' + sym + '</b><span>' + esc(F.symName(sym)) + '</span></div>' +
+      '<span class="price">--</span><span class="pct flat">--</span><span class="range" title="Day range"><i></i></span></div>';
+  }
+  function headRow() { return '<div class="row row--head" aria-hidden="true"><span>Name</span><span>Price</span><span>Today</span><span>Day range</span></div>'; }
+  function fillQuotes(id, syms, fn) {
+    var host = $(id); if (!host) return;
+    host.innerHTML = syms.map(fn).join('');
+    each(host.querySelectorAll('[data-sym]'), function (elx) {
+      var s = elx.getAttribute('data-sym'); F.bind(elx, function () { return F.quotes[s]; }, { cur: '$' });
+    });
+  }
+  function cardHTML(it, i) {
+    return '<a class="card" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer" style="--tilt:' + (((i * 5) % 3) - 1) * 0.35 + 'deg">' +
+      '<span class="tag"><b>' + esc(it.src) + '</b>' + (it.type === 'official' ? '<em>Official</em>' : '') + '<span>' + esc(F.timeAgo(it.ts)) + '</span></span>' +
+      '<span class="card__t">' + esc(it.title) + '</span>' +
+      '<span class="go">Read at the source <svg width="28" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg></span></a>';
+  }
+  function badgeHTML(kind) { return '<span class="badge" data-badge="' + kind + '"><i></i><span>--</span></span>'; }
+  function paintBadges() {
+    each(document.querySelectorAll('[data-badge]'), function (b) {
+      var l = b.getAttribute('data-badge') === 'crypto' ? F.cryptoLabel() : F.stockLabel();
+      b.className = 'badge ' + l.cls; b.querySelector('span').textContent = l.text;
+    });
+  }
+  function hoursHTML(ids) {
+    return ids.map(function (id) { return '<span class="hr" data-ex="' + id + '"><i></i>' + esc(F.EXCHANGES[id].name) + ' <b></b> <em></em></span>'; }).join('');
+  }
+  function paintHours() {
+    each(document.querySelectorAll('[data-ex]'), function (s) {
+      var id = s.getAttribute('data-ex'), open = F.isOpen(id);
+      s.classList.toggle('is-open', open);
+      s.querySelector('b').textContent = F.clock(F.EXCHANGES[id].tz);
+      s.querySelector('em').textContent = open ? 'open' : 'closed';
+    });
+  }
+  function seal(text, id) {
+    var unit = text + ' \u00b7 ', n = Math.max(1, Math.round(34 / unit.length)), t = new Array(n + 1).join(unit);
+    var fs = Math.min(13, 278 / t.length * 1.32).toFixed(1);
+    return '<svg class="seal" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="sl' + id + '" d="M60,60 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0"/></defs><text style="font-size:' + fs + 'px"><textPath href="#sl' + id + '" textLength="276" lengthAdjust="spacing">' + esc(t) + '</textPath></text></svg>';
+  }
+  function moverList(id, arr, kind, cur, pad) {
+    var host = $(id); if (!host) return;
+    var rows = arr.map(function (q, i) {
+      var sym = q.sym.toUpperCase();
+      return '<li class="mv"><span class="mv__rank">' + (i + 1) + '</span><span class="mv__id"><b>' + esc(sym) + '</b><span>' + esc(q.name) + '</span></span><span class="price">' + esc(F.fmtPrice(q.price, cur)) + '</span><span class="pct ' + F.dir(q.pct) + '">' + F.fmtPct(q.pct) + '</span></li>';
+    });
+    while (rows.length < pad) rows.push('<li class="mv mv--empty"><span class="mv__rank">' + (rows.length + 1) + '</span><span class="mv__id"><span>' + (kind === 'up' ? 'No more risers right now' : 'No more fallers right now') + '</span></span></li>');
+    host.innerHTML = rows.join('');
+  }
+
+  /* ---------- a market pond ---------- */
+  function renderPond(cfg) {
+    var all = cfg.tiles.concat(cfg.list, cfg.extra ? cfg.extra.list : []);
+    var scope = cfg.tiles.concat(cfg.list);
+    document.title = 'FRMM | ' + cfg.title + ' markets';
+    main.innerHTML =
+      '<section class="phero"><div class="wrap phero__grid">' +
+      '<div class="phero__copy"><p class="sticker">Pond ' + cfg.num + ' &middot; ' + esc(cfg.name) + '</p>' +
+      '<h1 class="phero__title">' + esc(cfg.title) + '<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
+      '<p class="phero__lede">' + esc(cfg.lede) + '</p>' +
+      '<div class="hours" id="hours">' + hoursHTML(cfg.hours) + '</div></div>' +
+      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal(cfg.seal, page) +
+      '<div class="mascot">' + F.mascot(page) + '</div>' +
+      '<div class="bubble" id="bubble" aria-live="polite"><b id="bubbleMood">Checking the tide</b><span id="bubbleLine">' + esc(cfg.quips[0]) + '</span></div></div>' +
+      '</div></section>' +
+
+      '<section class="sec" id="tiles"><div class="wrap">' +
+      '<div class="sec__head reveal"><h2 class="h2">Headline acts</h2>' + badgeHTML('stocks') + '</div>' +
+      '<div class="tiles reveal" id="tileGrid"></div></div></section>' +
+
+      '<section class="sec" id="movers"><div class="wrap">' +
+      '<div class="sec__head reveal"><h2 class="h2">Big fish &amp; small fry</h2><p class="sub">Today\'s biggest risers and fallers on this page</p></div>' +
+      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>Big fish<small>riding high</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
+      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>Small fry<small>feeling the pressure</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
+
+      '<section class="sec" id="shoal"><div class="wrap">' +
+      '<div class="sec__head reveal"><h2 class="h2">' + esc(cfg.listTitle) + '</h2><p class="sub">' + esc(cfg.listSub) + '</p></div>' +
+      '<div class="panel tbl reveal" id="shoalTable"></div>' +
+      (cfg.extra ? '<div class="sec__head sec__head--sub reveal"><h3 class="h3">' + esc(cfg.extra.title) + '</h3><p class="sub">' + esc(cfg.extra.sub) + '</p></div><div class="panel tbl reveal" id="extraTable"></div>' : '') +
+      '<p class="foot-note reveal">' + esc(cfg.note) + '</p></div></section>' +
+
+      '<section class="sec" id="sterling"><div class="wrap">' +
+      '<div class="sec__head reveal"><h2 class="h2">Sterling corner</h2><p class="sub">What &pound;1 buys today. Green means the pound got stronger. European Central Bank reference rates.</p></div>' +
+      '<div class="fxgrid reveal" id="fxGrid"></div></div></section>' +
+
+      (cfg.official ? '<section class="sec" id="official"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The official desk</h2><p class="sub">Straight from the Bank of England, the Office for National Statistics and HM Treasury</p></div><div class="offgrid reveal" id="offGrid"></div></div></section>' : '') +
+
+      '<section class="sec sec--last" id="news"><div class="wrap">' +
+      '<div class="sec__head reveal"><h2 class="h2">Fresh from the newsroom</h2><a class="btn" href="trends.html">See what is trending</a></div>' +
+      '<div class="cards reveal" id="cards"></div><p class="foot-note" id="newsFoot"></p></div></section>';
+
+    fillQuotes('tileGrid', cfg.tiles, tileHTML);
+    $('shoalTable').innerHTML = headRow() + '<div id="shoalRows"></div>';
+    fillQuotes('shoalRows', cfg.list, rowHTML);
+    if (cfg.extra) { $('extraTable').innerHTML = headRow() + '<div id="extraRows"></div>'; fillQuotes('extraRows', cfg.extra.list, rowHTML); }
+
+    var lastMv = 0, quipI = 0, mvT = null;
+    var paintMovers = function () {
+      if (Date.now() - lastMv < 2500) { if (!mvT) mvT = setTimeout(function () { mvT = null; paintMovers(); }, 2600); return; }
+      lastMv = Date.now();
+      var m = F.movers(scope, 3);
+      moverList('mvUp', m.winners, 'up', '$', 3); moverList('mvDown', m.losers, 'down', '$', 3);
+      var mood = F.mood(scope);
+      if (mood) {
+        var up = scope.filter(function (s) { return F.quotes[s].price != null && F.quotes[s].pct > 0; }).length;
+        $('bubbleMood').textContent = mood.label;
+        var best = m.winners[0];
+        $('bubbleLine').textContent = up + ' of ' + scope.length + ' up' + (best ? '. Biggest fish: ' + best.sym + ' ' + F.fmtPct(best.pct) : '') + '.';
+      }
+    };
+    F.on('tick', paintMovers);
+    setInterval(function () { quipI = (quipI + 1) % cfg.quips.length; }, 9000);
+
+    var paintFx = function () {
+      var host = $('fxGrid'); if (!host) return;
+      var pairs = F.fx.pairs.filter(function (p) { return cfg.fx.indexOf(p.code) >= 0; });
+      if (!pairs.length) { host.innerHTML = '<p class="empty">Exchange rates are loading.</p>'; return; }
+      host.innerHTML = pairs.map(function (p) {
+        return '<div class="fx"><span class="fx__code">&pound;1 &rarr; ' + p.code + '</span><b class="fx__rate">' + esc(p.rate.toLocaleString('en-GB', { maximumFractionDigits: p.rate > 50 ? 2 : 4, minimumFractionDigits: p.rate > 50 ? 2 : 4 })) + '</b><span class="fx__name">' + esc(p.name) + '</span><span class="pct ' + F.dir(p.pct) + '">' + F.fmtPct(p.pct) + '</span></div>';
+      }).join('');
+    };
+    F.on('fx', paintFx); paintFx();
+
+    var paintNews = function () {
+      var host = $('cards'); if (!host) return;
+      var list = F.headlines({ tags: cfg.news.tags, re: cfg.news.re, n: 6, official: cfg.official ? false : undefined });
+      if (list.length < 6) list = list.concat(F.feed.items.filter(function (it) { return list.indexOf(it) < 0 && it.type !== 'official'; }).slice(0, 6 - list.length));
+      host.innerHTML = list.map(cardHTML).join('') || '<p class="empty">' + (F.feed.status === 'error' ? 'The newsroom feeds are not answering right now. Try again in a minute.' : 'Fishing for headlines...') + '</p>';
+      var used = {}; list.forEach(function (it) { used[it.src] = 1; });
+      $('newsFoot').textContent = list.length ? 'Sources: ' + Object.keys(used).join(', ') + '. Links open the original publisher in a new tab.' : '';
+      if (cfg.official) {
+        var off = F.feed.items.filter(function (it) { return it.type === 'official'; });
+        var groups = {}; off.forEach(function (it) { (groups[it.src] = groups[it.src] || []).push(it); });
+        var og = $('offGrid');
+        og.innerHTML = Object.keys(groups).map(function (k) {
+          return '<div class="panel off"><h3>' + esc(k) + '</h3><ul>' + groups[k].slice(0, 4).map(function (it) { return '<li><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(it.title) + '</span><em>' + esc(F.timeAgo(it.ts)) + '</em></a></li>'; }).join('') + '</ul></div>';
+        }).join('') || '<p class="empty">Official releases are loading.</p>';
+      }
+    };
+    F.on('feeds', paintNews); paintNews();
+    F.reveal();
+    F.watch(all);
+    F.startFeeds(cfg.feeds);
+  }
+
+  /* ---------- crypto ---------- */
+  function renderCrypto() {
+    document.title = 'FRMM | Crypto';
+    main.innerHTML =
+      '<section class="phero"><div class="wrap phero__grid">' +
+      '<div class="phero__copy"><p class="sticker">Pond 05 &middot; Crypto</p>' +
+      '<h1 class="phero__title">Crypto<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
+      '<p class="phero__lede">The market that never closes. Prices in pounds by default, straight from CoinGecko, refreshed every 45 seconds.</p>' +
+      '<div class="seg" id="curSeg" role="tablist" aria-label="Currency"><button type="button" role="tab" data-cur="gbp">&pound; Pounds</button><button type="button" role="tab" data-cur="usd">$ Dollars</button></div></div>' +
+      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('ALWAYS OPEN', page) + '<div class="mascot">' + F.mascot('crypto') + '</div>' +
+      '<div class="bubble"><b id="bubbleMood">Reading the tea leaves</b><span id="bubbleLine">Prices can move fast. Hold on to your claws.</span></div></div>' +
+      '</div></section>' +
+
+      '<section class="sec" id="coinsec"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The big shellfish</h2>' + badgeHTML('crypto') + '</div><div class="coins reveal" id="coins"></div></div></section>' +
+      '<section class="sec" id="movers"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Big fish &amp; small fry</h2><p class="sub">Biggest 24 hour movers among the top coins</p></div>' +
+      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>Big fish<small>riding high</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
+      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>Small fry<small>feeling the pressure</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
+      '<section class="sec" id="allcoins"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The rest of the reef</h2><p class="sub">Next coins by market value</p></div><div class="panel tbl tbl--coins reveal" id="coinTable"></div></div></section>' +
+      '<section class="sec sec--last" id="news"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Fresh from the newsroom</h2><a class="btn" href="trends.html">See what is trending</a></div><div class="cards reveal" id="cards"></div><p class="foot-note" id="newsFoot"></p></div></section>';
+
+    var seg = $('curSeg');
+    var paintSeg = function () { each(seg.querySelectorAll('button'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-cur') === F.cur)); }); };
+    seg.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { F.setCur(b.getAttribute('data-cur')); paintSeg(); } });
+    paintSeg();
+
+    var paintCoins = function () {
+      var cur = F.curSym(), host = $('coins');
+      if (!F.coins.length) {
+        host.innerHTML = '<p class="empty">' + (F.coinsStatus === 'error' ? 'CoinGecko is busy right now. Retrying automatically.' : 'Diving for prices...') + '</p>';
+        $('coinTable').innerHTML = ''; moverList('mvUp', [], 'up', cur, 3); moverList('mvDown', [], 'down', cur, 3); return;
+      }
+      host.innerHTML = F.coins.slice(0, 8).map(function (c) {
+        var up = c.spark.length > 1 && c.spark[c.spark.length - 1] >= c.spark[0], col = up ? '#3ee6b8' : '#ff7d8c';
+        var img = /^https:/.test(c.image || '') ? '<img class="coin__img" loading="lazy" alt="" src="' + esc(c.image) + '">' : '<span class="coin__img">' + esc(c.sym.slice(0, 3).toUpperCase()) + '</span>';
+        return '<div class="coin" data-coin="' + esc(c.sym) + '"><div class="coin__top">' + img + '<div class="coin__id"><b>' + esc(c.sym.toUpperCase()) + '</b><span>' + esc(c.name) + '</span></div></div>' +
+          '<div class="coin__price price">--</div><div class="coin__mid"><span class="pct flat">--</span><span class="coin__24">24 HOURS</span></div>' +
+          '<svg class="coin__spark" viewBox="0 0 220 52" preserveAspectRatio="none" aria-hidden="true"><path d="' + sparkPath(c.spark, 220, 52) + ' L220 52 L0 52 Z" fill="' + col + '" opacity=".13"/><path d="' + sparkPath(c.spark, 220, 52) + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>' +
+          '<div class="coin__foot"><span>Low ' + esc(F.fmtPrice(c.lo, cur)) + '</span><span>High ' + esc(F.fmtPrice(c.hi, cur)) + '</span></div></div>';
+      }).join('');
+      F.clearBindings();
+      each(host.querySelectorAll('[data-coin]'), function (elx) { var s = elx.getAttribute('data-coin'); F.bind(elx, function () { return F.coinOf(s); }, { cur: F.curSym }); });
+      $('coinTable').innerHTML = '<div class="row row--head" aria-hidden="true"><span>Name</span><span>Price</span><span>24 hours</span><span>Market value</span></div>' + F.coins.slice(8, 40).map(function (c) {
+        return '<div class="row"><div class="row__id"><b>' + esc(c.sym.toUpperCase()) + '</b><span>' + esc(c.name) + '</span></div><span class="price">' + esc(F.fmtPrice(c.price, cur)) + '</span><span class="pct ' + F.dir(c.pct) + '">' + F.fmtPct(c.pct) + '</span><span class="cap">' + esc(F.fmtCompact(c.cap, cur)) + '</span></div>';
+      }).join('');
+      var m = F.coinMovers(3);
+      moverList('mvUp', m.winners, 'up', cur, 3); moverList('mvDown', m.losers, 'down', cur, 3);
+      var avg = F.coins.slice(0, 20).reduce(function (a, c) { return a + c.pct; }, 0) / Math.min(20, F.coins.length);
+      $('bubbleMood').textContent = avg > 3 ? 'To the moon (maybe)' : avg > 0.3 ? 'Bubbling nicely' : avg > -0.3 ? 'Crab-walking sideways' : avg > -3 ? 'A bit shellshocked' : 'Deep dive';
+      $('bubbleLine').textContent = 'The top 20 are ' + (avg >= 0 ? 'up ' : 'down ') + Math.abs(avg).toFixed(1) + '% on average today.';
+      paintBadges();
+    };
+    F.on('coins', paintCoins); paintCoins();
+    F.on('mode', paintBadges);
+
+    var paintNews = function () {
+      var list = F.feed.items.filter(function (it) { return it.tags.indexOf('crypto') >= 0; }).slice(0, 6);
+      $('cards').innerHTML = list.map(cardHTML).join('') || '<p class="empty">' + (F.feed.status === 'error' ? 'The newsroom feeds are not answering right now.' : 'Fishing for headlines...') + '</p>';
+      var used = {}; list.forEach(function (it) { used[it.src] = 1; });
+      $('newsFoot').textContent = list.length ? 'Sources: ' + Object.keys(used).join(', ') + '. Links open the original publisher in a new tab.' : '';
+    };
+    F.on('feeds', paintNews); paintNews();
+    F.reveal();
+    F.startFeeds(['cointelegraph', 'coindesk']);
+  }
+
+  /* ---------- trends ---------- */
+  function renderTrends() {
+    document.title = 'FRMM | What is trending';
+    main.innerHTML =
+      '<section class="phero"><div class="wrap phero__grid">' +
+      '<div class="phero__copy"><p class="sticker">Pond 06 &middot; Trends</p>' +
+      '<h1 class="phero__title">What everyone is saying<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
+      '<p class="phero__lede">A living map of the money, economy and world stories in the news over the last day and a half. Bigger bubbles mean more stories. Lines join topics that turn up in the same headline. Only reputable outlets and official bodies feed it.</p>' +
+      '<p class="trendstat" id="trendStat">Fishing for headlines...</p></div>' +
+      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('WHAT EVERYONE IS SAYING', page) + '<div class="mascot">' + F.mascot('trends') + '</div>' +
+      '<div class="bubble"><b id="bubbleMood">Something is glowing</b><span id="bubbleLine">Tap a bubble to read the stories.</span></div></div></div></section>' +
+
+      '<section class="sec" id="web"><div class="wrap">' +
+      '<div class="tools reveal"><div class="seg" id="viewSeg" role="tablist" aria-label="View"><button type="button" role="tab" data-view="web" aria-selected="true">The web</button><button type="button" role="tab" data-view="grid" aria-selected="false">The grid</button></div>' +
+      '<div class="legend" id="legend" role="group" aria-label="Filter by category"></div></div>' +
+      '<div class="webwrap reveal"><div class="webbox panel" id="webBox"></div><aside class="detail panel" id="detail" aria-live="polite"><p class="detail__hint">Tap a bubble or a tile to see the stories behind it, each linking to the outlet that ran it.</p></aside></div>' +
+      '<div class="gridbox reveal" id="gridBox" hidden></div></div></section>' +
+
+      '<section class="sec sec--last" id="sources"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Who is talking</h2><p class="sub">Outlets behind the current picture</p></div><div class="srcs reveal" id="srcList"></div>' +
+      '<p class="foot-note reveal">Topics are found by matching headlines against a list of subjects, plus names that several outlets use. It shows what is being covered, not whether it is true or important. Headlines are from BBC News, The Guardian, Sky News, the Financial Times, The Economist, CNBC, Reuters (via Finnhub), the Bank of England, the ONS and HM Treasury.</p></div></section>';
+
+    var data = null, view = 'web', cats = {}, webApi = null, sel = null;
+    var webBox = $('webBox'), detail = $('detail'), gridBox = $('gridBox');
+    Object.keys(F.CATS).forEach(function (k) { cats[k] = true; });
+
+    var legend = $('legend');
+    legend.innerHTML = Object.keys(F.CATS).map(function (k) { return '<button type="button" class="lg is-on" data-cat="' + k + '" style="--c:' + F.CATS[k].color + '" aria-pressed="true"><i></i>' + esc(F.CATS[k].label) + '</button>'; }).join('');
+    legend.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var k = b.getAttribute('data-cat'); cats[k] = !cats[k];
+      b.classList.toggle('is-on', cats[k]); b.setAttribute('aria-pressed', String(cats[k]));
+      draw();
+    });
+    $('viewSeg').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      view = b.getAttribute('data-view');
+      each($('viewSeg').querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', String(x === b)); });
+      draw();
+    });
+
+    function pick(n) {
+      sel = n;
+      detail.innerHTML = F.topicDetail(n, data);
+      each(detail.querySelectorAll('.chip'), function (c) {
+        c.addEventListener('click', function () { var t = data.nodes.find(function (x) { return x.id === c.getAttribute('data-id'); }); if (t) { pick(t); if (webApi) webApi.select(t.id); } });
+      });
+      if (window.innerWidth < 900) detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function draw() {
+      if (!data) return;
+      var web = view === 'web';
+      $('webBox').parentNode.hidden = !web; gridBox.hidden = web;
+      if (web) { webApi = F.renderWeb(webBox, data, { cats: cats, onSelect: pick }); if (sel && webApi) webApi.select(sel.id); }
+      else F.renderGrid(gridBox, data, { cats: cats, onSelect: function (n) { pick(n); $('webBox').parentNode.hidden = false; gridBox.hidden = true; view = 'web'; each($('viewSeg').querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', String(x.getAttribute('data-view') === 'web')); }); webApi = F.renderWeb(webBox, data, { cats: cats, onSelect: pick }); webApi && webApi.select(n.id); } });
+    }
+    var t = null;
+    var update = function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        if (!F.feed.items.length) { if (F.feed.status === 'error') $('trendStat').textContent = 'The newsroom feeds are not answering right now. Try again in a minute.'; return; }
+        data = F.topicsFromFeed({ max: 32 });
+        var newest = F.feed.updated ? F.timeAgo(F.feed.updated) : 'just now';
+        $('trendStat').textContent = 'Based on ' + data.items + ' headlines from ' + data.sources.length + ' outlets. Updated ' + newest + '.';
+        if (data.nodes[0]) { $('bubbleMood').textContent = data.nodes[0].label + ' is glowing'; $('bubbleLine').textContent = data.nodes[0].mentions + ' stories from ' + data.nodes[0].sources + ' outlets.'; }
+        $('srcList').innerHTML = data.sources.map(function (s) { return '<span class="src' + (s.type === 'official' ? ' src--off' : '') + '"><b>' + esc(s.name) + '</b><em>' + s.n + ' headlines' + (s.type === 'official' ? ' &middot; Official' : '') + '</em></span>'; }).join('');
+        draw();
+      }, 250);
+    };
+    F.on('feeds', update);
+    var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (data && view === 'web') draw(); }, 300); });
+    F.reveal();
+    F.startFeeds();
+    F.watch(F.TICK_SYMS);
+  }
+
+  /* ---------- home ---------- */
+  function renderHome() {
+    var ponds = [
+      { k: 'uk', blurb: 'Sterling, the FTSE crowd and the news that moves them.', sym: 'EWU', label: 'UK stocks' },
+      { k: 'us', blurb: 'Wall Street, the big names, plus gold, oil and the dollar.', sym: 'SPY', label: 'S&P 500' },
+      { k: 'europe', blurb: 'The euro area, Germany, France and the continent\'s giants.', sym: 'FEZ', label: 'Euro Stoxx 50' },
+      { k: 'asia', blurb: 'Tokyo, Hong Kong, Mumbai and the chipmakers.', sym: 'EWJ', label: 'Japan' },
+      { k: 'crypto', blurb: 'The market that never sleeps, priced in pounds.', coin: 'btc', label: 'Bitcoin' },
+      { k: 'trends', blurb: 'A living web of what everyone is talking about.', label: 'Hot right now' }
+    ];
+    var host = $('ponds');
+    host.innerHTML = ponds.map(function (p, i) {
+      var pg = F.PAGES[p.k];
+      return '<a class="pond reveal" href="' + pg.href + '" style="--c:' + pg.color + ';--tilt:' + (((i * 3) % 5) - 2) * 0.5 + 'deg" data-pond="' + p.k + '">' +
+        '<span class="pond__art">' + F.mascot(p.k) + '</span>' +
+        '<span class="pond__num">0' + (i + 1) + '</span><b class="pond__name">' + esc(p.k === 'uk' ? 'The UK' : p.k === 'us' ? 'The US' : pg.label) + '</b>' +
+        '<span class="pond__blurb">' + esc(p.blurb) + '</span>' +
+        '<span class="pond__stat"><span class="pond__label">' + esc(p.label) + '</span>' + (p.k === 'trends' ? '<span class="pond__top" id="pondTop">Scanning the news</span>' : '<span class="price">--</span><span class="pct flat">--</span>') + '</span>' +
+        '<span class="pond__go">Dive in <svg width="26" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg></span></a>';
+    }).join('');
+    each(host.querySelectorAll('.pond'), function (elx) {
+      var k = elx.getAttribute('data-pond'), p = ponds.filter(function (x) { return x.k === k; })[0];
+      if (p.sym) F.bind(elx, function () { return F.quotes[p.sym]; }, { cur: '$', abs: false });
+      else if (p.coin) F.bind(elx, function () { return F.coinOf(p.coin); }, { cur: F.curSym });
+    });
+    each(document.querySelectorAll('[data-stick]'), function (elx) {
+      var sym = elx.getAttribute('data-stick');
+      if (sym === 'GBPUSD') F.bind(elx, function () { for (var i = 0; i < F.fx.pairs.length; i++) { if (F.fx.pairs[i].code === 'USD') return { price: F.fx.pairs[i].rate, pct: F.fx.pairs[i].pct, hi: 0, lo: 0 }; } return null; }, { cur: '', abs: false });
+      else if (sym === 'BTC') F.bind(elx, function () { return F.coinOf('btc'); }, { cur: F.curSym });
+      else F.bind(elx, function () { return F.quotes[sym]; }, { cur: '$' });
+    });
+    paintBadges();
+    F.watch(['EWU', 'SPY', 'FEZ', 'EWJ'].concat(F.TICK_SYMS));
+
+    var paintNews = function () {
+      var list = F.feed.items.filter(function (it) { return it.type !== 'official'; }).slice(0, 6);
+      $('cards').innerHTML = list.map(cardHTML).join('') || '<p class="empty">' + (F.feed.status === 'error' ? 'The newsroom feeds are not answering right now.' : 'Fishing for headlines...') + '</p>';
+    };
+    var webT = null, webDone = false;
+    var paintTrends = function () {
+      clearTimeout(webT);
+      webT = setTimeout(function () {
+        if (F.feed.items.length < 20) return;
+        var data = F.topicsFromFeed({ max: 16 });
+        if (!data.nodes.length) return;
+        $('pondTop') && ($('pondTop').textContent = data.nodes[0].label);
+        var box = $('miniWeb'); if (!box) return;
+        F.renderWeb(box, data, { compact: true, maxNodes: window.innerWidth < 640 ? 10 : 14, uid: 'h', onSelect: function () { location.href = 'trends.html'; } });
+        $('topList').innerHTML = data.nodes.slice(0, 5).map(function (n, i) { return '<li><span class="rk">' + (i + 1) + '</span><b>' + esc(n.label) + '</b><em>' + n.mentions + ' stories</em></li>'; }).join('');
+        webDone = true;
+      }, 300);
+    };
+    F.on('feeds', paintNews); F.on('feeds', paintTrends); paintNews();
+    F.on('mode', paintBadges);
+    F.reveal();
+    F.startFeeds();
+  }
+
+  /* ---------- boot ---------- */
+  F.on('mode', paintBadges);
+  F.on('tick', paintBadges);
+  F.on('coins', paintBadges);
+  F.watch(F.TICK_SYMS);
+
+  if (P[page]) renderPond(P[page]);
+  else if (page === 'crypto') renderCrypto();
+  else if (page === 'trends') renderTrends();
+  else renderHome();
+
+  paintHours(); setInterval(paintHours, 30000);
+  paintBadges();
+  F.startMarkets();
+  F.loadFx();
+  F.startCrypto();
+  window.addEventListener('load', function () { F.reveal(); });
+})();
