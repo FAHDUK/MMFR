@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRMM | Live markets, beneath the surface</title>
+<meta name="description" content="FRMM is a live market tracker: US and UK stocks, top winners and losers, crypto and a real-time news feed that links straight to the source.">
+<meta name="theme-color" content="#0a1e47">
+<meta property="og:title" content="FRMM | Markets, beneath the surface">
+<meta property="og:description" content="Live US and UK markets, movers, crypto and news.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<a class="skip" href="#markets">Skip to the markets</a>
+
+<div id="specks" class="specks" aria-hidden="true"></div>
+
+<!-- ===== Header ===== -->
+<header class="top" id="top">
+  <a class="brand" href="#hero" aria-label="FRMM home">
+    <svg class="brand__mark" viewBox="0 0 62 50" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+      <path d="M3 10c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2"/>
+      <path d="M3 22c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".78"/>
+      <path d="M3 34c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".56"/>
+      <path d="M3 46c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".34"/>
+    </svg>
+    <span class="brand__text">
+      <b>FRMM</b>
+      <span>LIVE MARKETS</span>
+      <span>BENEATH THE SURFACE</span>
+    </span>
+  </a>
+  <nav class="nav" aria-label="Sections">
+    <a href="#markets" data-nav="markets">MARKETS</a>
+    <a href="#movers" data-nav="movers">MOVERS</a>
+    <a href="#crypto" data-nav="crypto">CRYPTO</a>
+    <a href="#news" data-nav="news">NEWS</a>
+  </nav>
+  <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+    <svg class="i-open" width="34" height="22" viewBox="0 0 34 22" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 3h30M2 11h30M2 19h30"/></svg>
+    <svg class="i-close" width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 5l16 16M21 5L5 21"/></svg>
+  </button>
+</header>
+
+<!-- ===== Side rails ===== -->
+<a class="rail rail--left" id="railLeft" href="#markets">
+  <span id="railLeftText">DIVE IN</span>
+  <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="#ff4a3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l6 6 6-6"/></svg>
+</a>
+<div class="rail rail--right" aria-hidden="true">
+  <span class="rail__label">DEPTH</span>
+  <span class="rail__track"><i id="depthThumb"></i></span>
+  <span class="rail__value"><b id="depthValue">0</b> M</span>
+</div>
+
+<main>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="hero" aria-label="FRMM">
+  <div class="stage">
+    <div class="hero__shaft" aria-hidden="true"></div>
+    <div class="hero__glow" aria-hidden="true"></div>
+    <picture><source media="(max-width: 720px)" srcset="assets/betta-b.webp" width="1100" height="1138"><img class="hero__fish" src="assets/betta-a.webp" alt="" width="1500" height="1552" fetchpriority="high" decoding="async"></picture>
+    <h1 class="hero__word">FRMM</h1>
+    <p class="hero__markets">MARKETS</p>
+    <p class="hero__tag">BENEATH THE SURFACE</p>
+
+    <div class="hero__dock">
+      <button class="dot dot--gear" type="button" data-open-menu aria-label="Connect live data">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+      <span class="dot dot--ny" id="hourNy" role="img" aria-label="NYSE and Nasdaq"><b>NY</b><i></i></span>
+      <span class="dot dot--ldn" id="hourLdn" role="img" aria-label="London Stock Exchange"><b>LDN</b><i></i></span>
+
+      <div class="ticker" aria-label="Market ticker">
+        <span class="ticker__badge" id="tickerBadge"><i></i><span>LIVE</span></span>
+        <span class="ticker__mask"><span class="ticker__track" id="tickerTrack"></span></span>
+      </div>
+
+      <button class="connect" type="button" data-open-menu>
+        <span class="connect__icon" aria-hidden="true">
+          <em class="connect__glow connect__glow--a"></em><em class="connect__glow connect__glow--b"></em>
+          <span class="connect__key"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg></span>
+        </span>
+        <span class="connect__text" id="connectText">CONNECT<br>LIVE DATA</span>
+        <svg class="connect__arrow" width="34" height="10" viewBox="0 0 34 10" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 01 Markets ===== -->
+<section class="sec" id="markets" data-section="markets" data-next="NEXT: MOVERS" data-target="#movers">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow"><i></i><span>01 &nbsp;/&nbsp; SURFACE</span></p>
+      <h2 class="h2">US &amp; UK markets</h2>
+      <p class="lede">The big benchmarks and heavyweights, updating as the tide moves.</p>
+      <div class="hours" id="hours"></div>
+    </div>
+
+    <div class="cols">
+      <section class="panel reveal" aria-labelledby="usTitle">
+        <div class="panel__head">
+          <h3 id="usTitle"><span class="flag">US</span>United States</h3>
+          <span class="badge" data-badge="stocks"><i></i><span>LIVE</span></span>
+        </div>
+        <div class="tiles" id="usTiles"></div>
+        <div class="rows" id="usRows"></div>
+      </section>
+
+      <section class="panel reveal" aria-labelledby="ukTitle">
+        <div class="panel__head">
+          <h3 id="ukTitle"><span class="flag">UK</span>United Kingdom</h3>
+          <span class="badge" data-badge="stocks"><i></i><span>LIVE</span></span>
+        </div>
+        <div class="tiles" id="ukTiles"></div>
+        <div class="rows" id="ukRows"></div>
+      </section>
+    </div>
+    <p class="foot foot--wide reveal">UK exposure is tracked through the iShares MSCI UK ETF and US-listed UK giants (ADRs), priced in US dollars. Direct London Stock Exchange prices need a paid data plan.</p>
+  </div>
+</section>
+
+<!-- ===== 02 Movers ===== -->
+<section class="sec" id="movers" data-section="movers" data-next="NEXT: CRYPTO" data-target="#crypto">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow"><i></i><span>02 &nbsp;/&nbsp; CURRENTS</span></p>
+      <h2 class="h2">Rising &amp; sinking</h2>
+      <p class="lede">Top winners and losers right now. Switch the pool to see where the pressure is.</p>
+      <div class="seg" id="moversTabs" role="tablist" aria-label="Movers pool">
+        <button type="button" role="tab" aria-selected="true" data-pool="us">US STOCKS</button>
+        <button type="button" role="tab" aria-selected="false" data-pool="uk">UK (VIA ADRS)</button>
+        <button type="button" role="tab" aria-selected="false" data-pool="crypto">CRYPTO</button>
+      </div>
+    </div>
+
+    <div class="cols">
+      <section class="panel reveal" aria-labelledby="winTitle">
+        <div class="panel__head">
+          <h3 id="winTitle"><span class="arrow arrow--up"><svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 1l6 10H1z" fill="#3ee6b8"/></svg></span>Top winners</h3>
+          <span class="badge" data-badge="movers"><i></i><span>LIVE</span></span>
+        </div>
+        <ol class="movers" id="winners"></ol>
+      </section>
+      <section class="panel reveal" aria-labelledby="loseTitle">
+        <div class="panel__head">
+          <h3 id="loseTitle"><span class="arrow arrow--down"><svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 11L1 1h12z" fill="#ff7d8c"/></svg></span>Top losers</h3>
+        </div>
+        <ol class="movers" id="losers"></ol>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 Crypto ===== -->
+<section class="sec" id="crypto" data-section="crypto" data-next="NEXT: NEWS" data-target="#news">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow"><i></i><span>03 &nbsp;/&nbsp; DEEP WATER</span></p>
+      <h2 class="h2">Crypto, streaming live</h2>
+      <p class="lede">Top coins by market cap. Prices stream over WebSocket, seven day trends refresh every minute.</p>
+      <span class="badge" data-badge="crypto"><i></i><span>LIVE</span></span>
+    </div>
+    <div class="coins" id="coinGrid"></div>
+  </div>
+</section>
+
+<!-- ===== 04 News ===== -->
+<section class="sec sec--last" id="news" data-section="news" data-next="BACK TO SURFACE" data-target="#hero">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow"><i></i><span>04 &nbsp;/&nbsp; SIGNALS</span></p>
+      <h2 class="h2">The live feed</h2>
+      <p class="lede">Headlines from the newsroom, straight to the original article. Refreshes every few minutes.</p>
+      <div class="seg" id="newsTabs" role="tablist" aria-label="News category">
+        <button type="button" role="tab" aria-selected="true" data-tab="top">TOP</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="markets">MARKETS</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="crypto">CRYPTO</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="uk">UK BUSINESS</button>
+      </div>
+    </div>
+    <div id="newsFeature" class="reveal"></div>
+    <div class="news" id="newsList"></div>
+    <p class="foot foot--wide" id="newsFoot"></p>
+    <p class="disclaimer">FRMM is an information tool, not financial advice. Prices may be delayed and can be wrong. Market data from Finnhub, CoinGecko and Binance; headlines from the publishers linked on each story.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Menu / connect ===== -->
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <img class="menu__fish" src="assets/betta-b.webp" alt="" width="1100" height="1138" loading="lazy" decoding="async">
+  <div class="menu__inner">
+    <ul class="menu__links">
+      <li><a href="#markets"><em>01</em>Markets</a></li>
+      <li><a href="#movers"><em>02</em>Movers</a></li>
+      <li><a href="#crypto"><em>03</em>Crypto</a></li>
+      <li><a href="#news"><em>04</em>News</a></li>
+    </ul>
+    <form class="menu__card" id="keyForm" autocomplete="off">
+      <h3>Connect live data</h3>
+      <p>Crypto and news work with no signup. Live US stocks, indices and UK ADRs use a free Finnhub API key. It is already built in; paste another to replace it. Keys you paste are stored only in this browser.</p>
+      <label for="keyInput">FINNHUB API KEY</label>
+      <input id="keyInput" type="password" inputmode="text" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste key">
+      <p class="menu__note" id="keyNote" role="status"></p>
+      <div class="menu__actions">
+        <button type="button" class="btn btn--ghost" id="clearKey">REMOVE KEY</button>
+        <button type="submit" class="btn btn--solid">SAVE &amp; RELOAD</button>
+      </div>
+    </form>
+    <p class="menu__legal">FRMM is an information tool, not financial advice. Prices may be delayed and can be wrong.</p>
+  </div>
+</div>
+
+<noscript><p class="noscript">FRMM needs JavaScript to show live prices.</p></noscript>
+
+<script src="js/config.js"></script>
+<script src="js/markets.js"></script>
+<script src="js/news.js"></script>
+<script src="js/ocean.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
