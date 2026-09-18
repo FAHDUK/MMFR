@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRMM | Markets, beneath the surface</title>
+<meta name="description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a web of what the news is talking about.">
+<meta name="theme-color" content="#0a1e47">
+<meta property="og:title" content="FRMM | Markets, beneath the surface">
+<meta property="og:description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a web of what the news is talking about.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="home">
+<a class="skip" href="#main">Skip to the content</a>
+
+<main id="main">
+  <section class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="sticker">Live markets &middot; Made in the UK</p>
+        <h1 class="hero__word">FRMM</h1>
+        <p class="hero__tag">Markets, beneath the surface.</p>
+        <p class="hero__lede">Prices, big movers and the stories behind them, from London to Tokyo. Pick a pond, or see what everyone is talking about.</p>
+        <div class="hero__cta">
+          <a class="btn btn--solid" href="#ponds">Pick your pond</a>
+          <a class="btn" href="trends.html">What is trending</a>
+        </div>
+        <span class="badge" data-badge="stocks"><i></i><span>--</span></span>
+      </div>
+      <div class="hero__art">
+        <img class="hero__fish" src="assets/betta-a.webp" width="1500" height="1552" alt="A red and blue betta fish drifting in dark water" fetchpriority="high">
+        <span class="stk stk--a" data-stick="GBPUSD"><b>&pound;1 in $</b><span class="price">--</span><span class="pct flat">--</span></span>
+        <span class="stk stk--b" data-stick="BTC"><b>Bitcoin</b><span class="price">--</span><span class="pct flat">--</span></span>
+        <span class="stk stk--c" data-stick="EWU"><b>UK stocks</b><span class="price">--</span><span class="pct flat">--</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="ponds-sec">
+    <div class="wrap">
+      <div class="sec__head reveal"><h2 class="h2" id="ponds-h">Pick your pond</h2><p class="sub">Each market has its own page, colour and creature.</p></div>
+      <div class="pondgrid" id="ponds"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="hot">
+    <div class="wrap">
+      <div class="sec__head reveal"><h2 class="h2">What is everyone saying?</h2><a class="btn" href="trends.html">Open the full web</a></div>
+      <div class="wavesgrid reveal">
+        <div class="panel webbox webbox--mini" id="miniWeb"><p class="empty">Fishing for headlines...</p></div>
+        <div class="panel toplist"><h3>Top of the news</h3><ol id="topList"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--last" id="news">
+    <div class="wrap">
+      <div class="sec__head reveal"><h2 class="h2">Fresh from the newsroom</h2></div>
+      <div class="cards reveal" id="cards"></div>
+    </div>
+  </section>
+</main>
+
+<noscript><p style="position:relative;z-index:5;padding:120px 24px 24px;text-align:center;color:#fff">FRMM needs JavaScript to fetch live prices and headlines. Please turn it on and reload.</p></noscript>
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/markets.js"></script>
+<script src="js/data.js"></script>
+<script src="js/feeds.js"></script>
+<script src="js/trends.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/page.js"></script>
+</body>
+</html>
