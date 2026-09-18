@@ -44,3 +44,6 @@ The key is in `js/config.js`, so anyone can see it. It is a free key, and the fr
 ## Files
 
 `css/styles.css` all styling. `js/core.js` helpers and cache. `js/markets.js` stock quotes and market hours. `js/data.js` exchange rates and crypto. `js/feeds.js` news sources. `js/trends.js` topic finder and web. `js/ui.js` header, ticker, mascots and footer. `js/page.js` builds each page.
+
+
+live site
