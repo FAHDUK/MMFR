@@ -600,3 +600,6 @@ html[data-view="explore"] .srcs .src:nth-child(n+7) { display: none; }
   html[data-view="pro"] .hero__fish { inset: 5% 0 7% 5%; }
   html[data-view="pro"] .stk--b { top: 17%; right: 0; }
 }
+
+/* Explore card creature sizing fix */
+html[data-view="explore"] .pond__art { aspect-ratio: 12 / 11; }
