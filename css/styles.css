@@ -481,3 +481,122 @@ body.drawer-open { overflow: hidden; }
   .reveal { opacity: 1; transform: none; }
   .strip__track { animation: none !important; }
 }
+
+/* ==========================================================================
+   Pro / Explore views
+   One data product, two presentation layers. Pro is the default.
+   ========================================================================== */
+
+.copy--explore, .creature--explore, .explorer-guide { display: none; }
+html[data-view="explore"] .copy--pro,
+html[data-view="explore"] .creature--pro { display: none !important; }
+html[data-view="explore"] .copy--explore,
+html[data-view="explore"] .creature--explore { display: inline; }
+
+.top__actions { display: flex; align-items: center; gap: 10px; flex: none; }
+.view-switch { display: inline-flex; align-items: center; gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; background: rgba(7, 22, 54, .72); box-shadow: 0 10px 24px rgba(2, 8, 30, .16); }
+.view-switch__label { padding: 0 7px 0 9px; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.view-switch button { min-width: 58px; padding: 7px 11px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .05em; transition: background .2s, color .2s, box-shadow .2s; }
+.view-switch button[aria-pressed="true"] { background: var(--cream); color: var(--ink); box-shadow: 0 3px 10px rgba(2, 8, 30, .22); }
+.drawer__view { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--glass); }
+.drawer__view > div:first-child { display: flex; flex-direction: column; gap: 3px; }
+.drawer__view b { font-size: 15px; }
+.drawer__view span { font-size: 12px; color: var(--muted); }
+
+.creature { width: 100%; height: 100%; object-fit: contain; }
+.creature--pro { display: block; filter: drop-shadow(0 20px 28px rgba(1, 7, 24, .58)); }
+.creature--explore { width: 100%; height: 100%; }
+.creature--explore svg { width: 100%; height: 100%; }
+.drawer__m { position: relative; }
+.hero__fish > .creature, .mascot > .creature, .pond__art > .creature, .drawer__m > .creature { position: absolute; inset: 0; }
+
+.explorer-guide { width: min(100%, 560px); padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 16px; background: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, .04)); }
+.explorer-guide b { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.explorer-guide span { display: block; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.explorer-guide strong { color: #fff; }
+html[data-view="explore"] .explorer-guide { display: block; }
+
+.badge__help { padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, .18); font-size: 10px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted); }
+
+/* Pro: restrained financial editorial styling. */
+html[data-view="pro"] .serif,
+html[data-view="pro"] .h2,
+html[data-view="pro"] .h3,
+html[data-view="pro"] .phero__title,
+html[data-view="pro"] .hero__word,
+html[data-view="pro"] .tile__price,
+html[data-view="pro"] .fx__rate,
+html[data-view="pro"] .coin__price,
+html[data-view="pro"] .pond__name,
+html[data-view="pro"] .detail__title,
+html[data-view="pro"] .hot__name,
+html[data-view="pro"] .mv__rank,
+html[data-view="pro"] .card__t { font-variation-settings: 'SOFT' 0, 'WONK' 0; }
+html[data-view="pro"] body { background: radial-gradient(52% 30% at 88% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 72%), linear-gradient(180deg, #0b214c 0%, #091a3b 46%, #07142d 100%); }
+html[data-view="pro"] .specks { opacity: .46; }
+html[data-view="pro"] .hero__word { font-size: clamp(88px, 14vw, 210px); letter-spacing: -.045em; text-shadow: 0 12px 34px rgba(2, 8, 30, .34); }
+html[data-view="pro"] .hero__tag { font-style: normal; letter-spacing: -.01em; color: #e7edf9; }
+html[data-view="pro"] .hero__fish { inset: 3% -2% 3% 7%; width: auto; height: auto; }
+html[data-view="pro"] .hero__fish .creature--pro { filter: drop-shadow(0 32px 44px rgba(3, 10, 44, .55)); }
+html[data-view="pro"] .stk--a { left: -1%; top: 12%; }
+html[data-view="pro"] .stk--b { right: -2%; top: 18%; }
+html[data-view="pro"] .stk--c { left: 1%; bottom: 9%; }
+html[data-view="pro"] .sticker { border: 1px solid color-mix(in srgb, var(--accent) 70%, #fff); border-radius: 999px; background: color-mix(in srgb, var(--accent) 18%, rgba(7, 22, 54, .72)); color: #fff; box-shadow: none; }
+html[data-view="pro"] .btn { border-width: 1px; border-color: rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .035); }
+html[data-view="pro"] .btn--solid { border-color: var(--cream); background: var(--cream); box-shadow: 0 8px 24px rgba(2, 8, 30, .24); }
+html[data-view="pro"] .panel,
+html[data-view="pro"] .card,
+html[data-view="pro"] .tile,
+html[data-view="pro"] .coin,
+html[data-view="pro"] .hot,
+html[data-view="pro"] .pond { border-radius: 18px; box-shadow: 0 16px 38px rgba(1, 7, 24, .23), inset 0 1px 0 rgba(255, 255, 255, .06); }
+html[data-view="pro"] .pond { border: 1px solid color-mix(in srgb, var(--c) 38%, rgba(255, 255, 255, .12)); background: linear-gradient(160deg, color-mix(in srgb, var(--c) 8%, rgba(255, 255, 255, .045)), rgba(255, 255, 255, .025) 64%); }
+html[data-view="pro"] .pond::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: var(--c); opacity: .82; }
+html[data-view="pro"] .pond__num { border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); background: transparent; color: var(--c); }
+html[data-view="pro"] .pond__art { right: 4px; top: 0; width: 47%; max-width: 196px; height: 145px; transform: none; }
+html[data-view="pro"] .pond:hover .pond__art { transform: translateY(-2px) scale(1.02); }
+html[data-view="pro"] .pond__art .creature--pro { object-position: center; }
+html[data-view="pro"] .pond__name { margin-top: 58px; }
+html[data-view="pro"] .phero__blob { inset: 12%; border-radius: 50%; opacity: .28; filter: blur(4px); animation: none; }
+html[data-view="pro"] .mascot { inset: 8% 1% 7%; animation: drift 10s ease-in-out infinite; filter: none; }
+html[data-view="pro"] .seal, html[data-view="pro"] .squig { display: none; }
+html[data-view="pro"] .bubble { left: 2%; bottom: 1%; max-width: 88%; border: 1px solid var(--line); border-radius: 15px; background: rgba(7, 22, 54, .88); color: #fff; box-shadow: 0 14px 32px rgba(2, 8, 30, .3); }
+html[data-view="pro"] .bubble::after { display: none; }
+html[data-view="pro"] .bubble b { font-family: var(--sans); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+html[data-view="pro"] .bubble span { color: var(--muted); }
+html[data-view="pro"] .card { border-top-width: 2px; }
+html[data-view="pro"] .card__t { min-height: 3.66em; display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+html[data-view="pro"] .sec { padding-top: 56px; }
+html[data-view="pro"] .sec--last { padding-bottom: 68px; }
+.wavesgrid { display: block; }
+
+/* Explore: retain the expressive artwork while keeping the amount digestible. */
+html[data-view="explore"] .hero__fish .creature--explore { display: block; }
+html[data-view="explore"] #shoalRows .row:nth-child(n+7),
+html[data-view="explore"] #extraRows .row:nth-child(n+5),
+html[data-view="explore"] #coinTable .row:nth-child(n+10),
+html[data-view="explore"] .coins .coin:nth-child(n+5),
+html[data-view="explore"] .cards .card:nth-child(n+4),
+html[data-view="explore"] .offgrid .off:nth-child(n+3),
+html[data-view="explore"] .gridbox .hot:nth-child(n+9),
+html[data-view="explore"] .srcs .src:nth-child(n+7) { display: none; }
+
+@media (max-width: 1240px) {
+  .view-switch__label { display: none; }
+  .view-switch button { min-width: 52px; padding-inline: 9px; }
+}
+@media (max-width: 1080px) {
+  .top__actions .view-switch { display: inline-flex; }
+}
+@media (max-width: 640px) {
+  .top__actions { gap: 6px; }
+  .view-switch { padding: 3px; }
+  .view-switch button { min-width: 42px; padding: 6px 7px; font-size: 10px; }
+  .drawer__view { align-items: flex-start; flex-direction: column; }
+  .drawer__view .view-switch { width: 100%; }
+  .drawer__view .view-switch button { flex: 1; }
+  .badge { white-space: normal; }
+  .badge__help { flex-basis: 100%; padding: 5px 0 0; border: 0; }
+  html[data-view="pro"] .hero__fish { inset: 5% 0 7% 5%; }
+  html[data-view="pro"] .stk--b { top: 17%; right: 0; }
+}

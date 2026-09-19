@@ -82,9 +82,9 @@
     setInterval(F.loadCoins, F.cfg.COINS_REFRESH_MS);
   };
   F.cryptoLabel = function () {
-    if (F.coinsStatus === 'ok') return { text: 'LIVE', cls: 'is-live' };
-    if (F.coinsStatus === 'error') return { text: 'RETRYING', cls: 'is-demo' };
-    return { text: 'CONNECTING', cls: 'is-close' };
+    if (F.coinsStatus === 'ok') return { text: 'LIVE', cls: 'is-live', help: 'CoinGecko prices refresh about every 45 seconds.' };
+    if (F.coinsStatus === 'error') return { text: 'RETRYING', cls: 'is-demo', help: 'The price feed is unavailable and will retry automatically.' };
+    return { text: 'CONNECTING', cls: 'is-close', help: 'Waiting for the latest CoinGecko prices.' };
   };
 
   /* ---------- movers among coins ---------- */

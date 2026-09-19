@@ -8,6 +8,25 @@
   }, window.FRMM_CONFIG || {});
   F.cfg = CFG;
 
+  /* ---------- audience view: professional by default, remembered locally ---------- */
+  var VIEW = 'pro';
+  try {
+    var savedView = localStorage.getItem('frmm.view');
+    if (savedView === 'explore' || savedView === 'pro') VIEW = savedView;
+  } catch (e) { /* storage blocked */ }
+  F.view = VIEW;
+  document.documentElement.setAttribute('data-view', VIEW);
+  F.setView = function (next) {
+    if (next !== 'pro' && next !== 'explore') return;
+    F.view = next;
+    document.documentElement.setAttribute('data-view', next);
+    try { localStorage.setItem('frmm.view', next); } catch (e) { /* storage blocked */ }
+    F.emit('view', next);
+  };
+  F.copy = function (pro, explore) {
+    return '<span class="copy copy--pro">' + F.esc(pro) + '</span><span class="copy copy--explore">' + F.esc(explore) + '</span>';
+  };
+
   /* ---------- Finnhub key: this browser's saved key wins over config.js ---------- */
   var KEY = CFG.FINNHUB_KEY || '';
   F.keySource = KEY ? 'config' : 'none';

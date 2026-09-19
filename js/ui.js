@@ -161,6 +161,22 @@
   };
   F.mascot = function (id) { return MASCOTS[id] ? MASCOTS[id]() : ''; };
 
+  /* ---------- one creature slot, two visual languages ---------- */
+  var PRO_FISH = {
+    home: ['assets/pro/home-betta.webp', 'Red and blue betta fish'],
+    uk: ['assets/pro/uk-atlantic-salmon.webp', 'Atlantic salmon'],
+    us: ['assets/pro/us-striped-bass.webp', 'Striped bass'],
+    europe: ['assets/pro/europe-sea-bass.webp', 'European sea bass'],
+    asia: ['assets/pro/asia-koi.webp', 'Kohaku koi'],
+    crypto: ['assets/pro/crypto-blue-discus.webp', 'Electric blue discus fish'],
+    trends: ['assets/pro/trends-anglerfish.webp', 'Deep-sea anglerfish']
+  };
+  F.creature = function (id) {
+    var fish = PRO_FISH[id] || PRO_FISH.home;
+    return '<img class="creature creature--pro" src="' + fish[0] + '" alt="' + esc(fish[1]) + '" loading="' + (id === 'home' ? 'eager' : 'lazy') + '">' +
+      '<span class="creature creature--explore" aria-hidden="true">' + (MASCOTS[id] ? MASCOTS[id]() : WAVE) + '</span>';
+  };
+
   /* ---------- wave mark ---------- */
   var WAVE = '<svg viewBox="0 0 62 50" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M3 10c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2"/><path d="M3 22c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".78"/><path d="M3 34c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".56"/><path d="M3 46c5-7 10-7 14 0s9 7 14 0 10-7 14 0 7 5 11 2" opacity=".34"/></svg>';
   F.WAVE = WAVE;
@@ -187,7 +203,8 @@
       '<div class="top__bar">' +
       '<a class="brand" href="index.html" aria-label="FRMM home"><span class="brand__mark">' + WAVE + '</span><span class="brand__text"><b>FRMM</b><span>Markets, beneath the surface</span></span></a>' +
       '<nav class="nav" aria-label="Ponds">' + navLinks('nav__a') + '</nav>' +
-      '<button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>' +
+      '<div class="top__actions"><div class="view-switch" role="group" aria-label="Choose site view"><span class="view-switch__label">View</span><button type="button" data-view-choice="pro">Pro</button><button type="button" data-view-choice="explore">Explore</button></div>' +
+      '<button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button></div>' +
       '</div>' +
       '<div class="strip" aria-label="Market ticker"><span class="strip__badge" id="stripBadge"><i></i><span>LIVE</span></span><span class="strip__mask"><span class="strip__track" id="stripTrack"></span></span></div>';
     document.body.insertBefore(top, document.body.firstChild);
@@ -200,9 +217,10 @@
     drawer.className = 'drawer'; drawer.id = 'drawer'; drawer.hidden = true;
     drawer.innerHTML =
       '<div class="drawer__in">' +
+      '<div class="drawer__view"><div><b>Choose your view</b><span>Pro is detailed. Explore explains the essentials.</span></div><div class="view-switch" role="group" aria-label="Choose site view"><button type="button" data-view-choice="pro">Pro</button><button type="button" data-view-choice="explore">Explore</button></div></div>' +
       '<nav class="drawer__nav" aria-label="Ponds">' + order.map(function (k) {
         var p = PAGES[k];
-        return '<a href="' + p.href + '" style="--c:' + p.color + '"' + (k === page ? ' aria-current="page"' : '') + '><span class="drawer__m">' + (MASCOTS[k] ? MASCOTS[k]() : '<span class="drawer__w">' + WAVE + '</span>') + '</span><b>' + p.label + '</b></a>';
+        return '<a href="' + p.href + '" style="--c:' + p.color + '"' + (k === page ? ' aria-current="page"' : '') + '><span class="drawer__m">' + F.creature(k) + '</span><b>' + p.label + '</b></a>';
       }).join('') + '</nav>' +
       '<form class="drawer__key" id="keyForm" autocomplete="off"><h2>Your own Finnhub key</h2>' +
       '<p>This site already has a key built in. If you have your own free one from finnhub.io you can use it here. It stays in this browser only.</p>' +
@@ -216,7 +234,7 @@
     foot.className = 'foot';
     foot.innerHTML =
       '<div class="wrap foot__grid">' +
-      '<div class="foot__brand"><span class="brand__mark">' + WAVE + '</span><b>FRMM</b><p>Markets, beneath the surface. Made in the UK, with a lot of fish.</p></div>' +
+      '<div class="foot__brand"><span class="brand__mark">' + WAVE + '</span><b>FRMM</b><p>' + F.copy('Independent market context with a deep-sea identity.', 'Markets made clearer, with a lot of fish.') + '</p></div>' +
       '<nav class="foot__nav" aria-label="Ponds">' + order.map(function (k) { return '<a href="' + PAGES[k].href + '">' + PAGES[k].label + '</a>'; }).join('') + '</nav>' +
       '<div class="foot__src"><h2>Where it all comes from</h2><p><b>Prices:</b> Finnhub for shares, ETFs and ADRs listed in the US (free plan, so UK, European and Asian markets are tracked through US-listed funds and companies). CoinGecko for crypto. The European Central Bank, via Frankfurter, for exchange rates.</p>' +
       '<p><b>Headlines:</b> BBC News, The Guardian, Sky News, Financial Times, The Economist, CNBC, Reuters (via Finnhub), the Bank of England, the Office for National Statistics and HM Treasury. Every link opens the original article.</p></div>' +
@@ -224,6 +242,22 @@
     document.body.appendChild(foot);
   }
   buildChrome();
+
+  /* ---------- Pro / Explore switch ---------- */
+  function paintViewSwitches() {
+    F.each(document.querySelectorAll('[data-view-choice]'), function (button) {
+      var active = button.getAttribute('data-view-choice') === F.view;
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var button = e.target.closest('[data-view-choice]');
+    if (!button) return;
+    F.setView(button.getAttribute('data-view-choice'));
+    paintViewSwitches();
+  });
+  F.on('view', paintViewSwitches);
+  paintViewSwitches();
 
   /* ---------- drawer ---------- */
   var burger = $('burger'), drawer = $('drawer');
@@ -299,7 +333,10 @@
     var badge = $('stripBadge');
     var upd = function () {
       var l = F.stockLabel();
-      badge.className = 'strip__badge ' + l.cls; badge.querySelector('span').textContent = l.text;
+      badge.className = 'strip__badge ' + l.cls;
+      badge.querySelector('span').textContent = l.text;
+      badge.title = l.help || l.text;
+      badge.setAttribute('aria-label', l.text + (l.help ? ': ' + l.help : ''));
     };
     F.on('mode', upd); F.on('tick', upd); upd();
   }

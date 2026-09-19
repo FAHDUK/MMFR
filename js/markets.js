@@ -218,8 +218,10 @@
     };
   };
   F.stockLabel = function () {
-    if (F.stockMode === 'demo') return { text: 'DEMO', cls: 'is-demo' };
-    return F.isOpen('NYSE') ? { text: 'LIVE', cls: 'is-live' } : { text: 'LAST CLOSE', cls: 'is-close' };
+    if (F.stockMode === 'demo') return { text: 'DEMO', cls: 'is-demo', help: 'Practice prices, not the live market.' };
+    return F.isOpen('NYSE')
+      ? { text: 'LIVE', cls: 'is-live', help: 'Updating automatically; the feed can still be delayed.' }
+      : { text: 'LAST CLOSE', cls: 'is-close', help: 'The market is closed, so these are the latest closing prices.' };
   };
   F.mood = function (list) {
     var v = list.map(function (s) { return Q[s]; }).filter(function (q) { return q && q.price != null && !(q._bad >= 3); });

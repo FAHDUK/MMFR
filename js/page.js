@@ -11,6 +11,8 @@
     uk: {
       num: '01', name: 'United Kingdom', title: 'The UK', seal: 'LIVE FROM LONDON',
       lede: 'Sterling, the big London names and the news that moves them. UK shares are followed through the MSCI UK fund and London giants listed in New York, so prices are in dollars.',
+      simple: 'See how major UK companies, the pound and today\'s biggest stories are moving.',
+      guide: '<b>Quick guide</b><span><strong>ETF</strong> means a basket of investments. <strong>ADR</strong> lets a UK company trade in New York. Some UK prices here are therefore shown in US dollars.</span>',
       tiles: ['EWU', 'SHEL', 'AZN', 'HSBC'], list: ['BP', 'UL', 'GSK', 'DEO', 'RIO', 'BTI', 'BCS', 'LYG', 'VOD', 'NGG', 'NWG', 'RELX'],
       hours: ['LSE', 'NYSE'], fx: ['USD', 'EUR', 'JPY', 'CHF'], official: true,
       feeds: ['bbc-biz', 'bbc-eco', 'gdn-biz', 'sky', 'ft-uk', 'boe', 'ons', 'hmt'],
@@ -22,6 +24,8 @@
     us: {
       num: '02', name: 'United States', title: 'The US', seal: 'STRAIGHT FROM NEW YORK',
       lede: 'Wall Street in one glance: the big indices, the household names, and the gold, oil, dollar and bond moves underneath them.',
+      simple: 'Follow the best-known US market groups, companies and today\'s biggest movers.',
+      guide: '<b>Quick guide</b><span>An <strong>index</strong> follows a group of investments. The S&amp;P 500 follows 500 large US companies; Nasdaq is weighted towards technology.</span>',
       tiles: ['SPY', 'QQQ', 'DIA', 'IWM'], list: ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'JPM', 'V'],
       extra: { title: 'Other tides', sub: 'Gold, oil, the dollar and bonds', list: ['GLD', 'USO', 'UUP', 'TLT'] },
       hours: ['NYSE', 'LSE'], fx: ['USD', 'CAD'], feeds: ['cnbc', 'cnbc-eco', 'ft-mkts'],
@@ -33,6 +37,8 @@
     europe: {
       num: '03', name: 'Europe', title: 'Europe', seal: 'FROM THE CONTINENT',
       lede: 'Our nearest neighbours: the euro area, Germany, France and friends, plus the continental companies everyone has heard of.',
+      simple: 'See how major European markets and well-known companies are moving today.',
+      guide: '<b>Quick guide</b><span>A country <strong>fund</strong> holds shares from that market. It gives a broad view rather than tracking one company.</span>',
       tiles: ['FEZ', 'VGK', 'EWG', 'EWQ'], list: ['EWI', 'EWP', 'EWL', 'EWN', 'ASML', 'SAP', 'NVO', 'TTE', 'SNY'],
       hours: ['XETRA', 'LSE', 'NYSE'], fx: ['EUR', 'CHF'], feeds: ['ft-mkts', 'gdn-eco', 'economist', 'bbc-biz'],
       news: { tags: [], re: /Europe|eurozone|\bEU\b|\bECB\b|Germany|German|France|French|Italy|Spain|Brussels|\bDAX\b|Lagarde|euro\b/ },
@@ -43,6 +49,8 @@
     asia: {
       num: '04', name: 'Asia-Pacific', title: 'Asia', seal: 'EAST OF THE SUN',
       lede: 'Tokyo, Hong Kong, Shanghai, Mumbai and beyond: the country funds, and the chipmakers and carmakers that sell to the world.',
+      simple: 'Explore major Asian markets, technology companies and carmakers in one place.',
+      guide: '<b>Quick guide</b><span>The region opens before Europe and America. Many prices here use US-listed funds, so they may move during New York trading hours.</span>',
       tiles: ['EWJ', 'FXI', 'EWH', 'INDA'], list: ['MCHI', 'EWY', 'EWT', 'EWS', 'EWA', 'TSM', 'BABA', 'SONY', 'TM', 'INFY', 'PDD'],
       hours: ['TSE', 'HKEX', 'NYSE'], fx: ['JPY', 'CNY', 'INR', 'AUD'], feeds: ['ft-mkts', 'economist', 'cnbc'],
       news: { tags: [], re: /Asia|China|Chinese|Japan|Japanese|Hong Kong|India|Nikkei|\byuan\b|\byen\b|Korea|Taiwan|TSMC|Singapore|Australia|Beijing|Tokyo/ },
@@ -81,11 +89,16 @@
       '<span class="card__t">' + esc(it.title) + '</span>' +
       '<span class="go">Read at the source <svg width="28" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg></span></a>';
   }
-  function badgeHTML(kind) { return '<span class="badge" data-badge="' + kind + '"><i></i><span>--</span></span>'; }
+  function badgeHTML(kind) { return '<span class="badge" data-badge="' + kind + '"><i></i><span class="badge__state">--</span><small class="badge__help"></small></span>'; }
   function paintBadges() {
     each(document.querySelectorAll('[data-badge]'), function (b) {
       var l = b.getAttribute('data-badge') === 'crypto' ? F.cryptoLabel() : F.stockLabel();
-      b.className = 'badge ' + l.cls; b.querySelector('span').textContent = l.text;
+      b.className = 'badge ' + l.cls;
+      var state = b.querySelector('.badge__state') || b.querySelector('span');
+      var help = b.querySelector('.badge__help');
+      state.textContent = l.text;
+      if (help) help.textContent = l.help || '';
+      b.title = l.help || l.text;
     });
   }
   function hoursHTML(ids) {
@@ -121,23 +134,24 @@
     document.title = 'FRMM | ' + cfg.title + ' markets';
     main.innerHTML =
       '<section class="phero"><div class="wrap phero__grid">' +
-      '<div class="phero__copy"><p class="sticker">Pond ' + cfg.num + ' &middot; ' + esc(cfg.name) + '</p>' +
+      '<div class="phero__copy"><p class="sticker">' + F.copy('Market ' + cfg.num + ' · ' + cfg.name, 'Pond ' + cfg.num + ' · ' + cfg.name) + '</p>' +
       '<h1 class="phero__title">' + esc(cfg.title) + '<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
-      '<p class="phero__lede">' + esc(cfg.lede) + '</p>' +
-      '<div class="hours" id="hours">' + hoursHTML(cfg.hours) + '</div></div>' +
+      '<p class="phero__lede">' + F.copy(cfg.lede, cfg.simple) + '</p>' +
+      '<div class="hours" id="hours">' + hoursHTML(cfg.hours) + '</div>' +
+      '<aside class="explorer-guide">' + cfg.guide + '</aside></div>' +
       '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal(cfg.seal, page) +
-      '<div class="mascot">' + F.mascot(page) + '</div>' +
-      '<div class="bubble" id="bubble" aria-live="polite"><b id="bubbleMood">Checking the tide</b><span id="bubbleLine">' + esc(cfg.quips[0]) + '</span></div></div>' +
+      '<div class="mascot">' + F.creature(page) + '</div>' +
+      '<div class="bubble" id="bubble" aria-live="polite"><b id="bubbleMood">' + F.copy('Market breadth', 'Checking the tide') + '</b><span id="bubbleLine">' + F.copy('Waiting for the latest price data.', cfg.quips[0]) + '</span></div></div>' +
       '</div></section>' +
 
       '<section class="sec" id="tiles"><div class="wrap">' +
-      '<div class="sec__head reveal"><h2 class="h2">Headline acts</h2>' + badgeHTML('stocks') + '</div>' +
+      '<div class="sec__head reveal"><h2 class="h2">' + F.copy('Key market indicators', 'Headline acts') + '</h2>' + badgeHTML('stocks') + '</div>' +
       '<div class="tiles reveal" id="tileGrid"></div></div></section>' +
 
       '<section class="sec" id="movers"><div class="wrap">' +
-      '<div class="sec__head reveal"><h2 class="h2">Big fish &amp; small fry</h2><p class="sub">Today\'s biggest risers and fallers on this page</p></div>' +
-      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>Big fish<small>riding high</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
-      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>Small fry<small>feeling the pressure</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
+      '<div class="sec__head reveal"><h2 class="h2">' + F.copy('Market movers', 'Big fish & small fry') + '</h2><p class="sub">' + F.copy('Largest percentage gains and losses in this market view', 'Today\'s biggest risers and fallers on this page') + '</p></div>' +
+      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>' + F.copy('Top gainers', 'Big fish') + '<small>' + F.copy('highest today', 'riding high') + '</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
+      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>' + F.copy('Top decliners', 'Small fry') + '<small>' + F.copy('lowest today', 'feeling the pressure') + '</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
 
       '<section class="sec" id="shoal"><div class="wrap">' +
       '<div class="sec__head reveal"><h2 class="h2">' + esc(cfg.listTitle) + '</h2><p class="sub">' + esc(cfg.listSub) + '</p></div>' +
@@ -146,13 +160,13 @@
       '<p class="foot-note reveal">' + esc(cfg.note) + '</p></div></section>' +
 
       '<section class="sec" id="sterling"><div class="wrap">' +
-      '<div class="sec__head reveal"><h2 class="h2">Sterling corner</h2><p class="sub">What &pound;1 buys today. Green means the pound got stronger. European Central Bank reference rates.</p></div>' +
+      '<div class="sec__head reveal"><h2 class="h2">' + F.copy('Sterling exchange rates', 'Pound converter') + '</h2><p class="sub">' + F.copy('European Central Bank reference rates for one pound sterling', 'What £1 buys today. Green means the pound became stronger.') + '</p></div>' +
       '<div class="fxgrid reveal" id="fxGrid"></div></div></section>' +
 
-      (cfg.official ? '<section class="sec" id="official"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The official desk</h2><p class="sub">Straight from the Bank of England, the Office for National Statistics and HM Treasury</p></div><div class="offgrid reveal" id="offGrid"></div></div></section>' : '') +
+      (cfg.official ? '<section class="sec" id="official"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('Official releases', 'The official desk') + '</h2><p class="sub">Straight from the Bank of England, the Office for National Statistics and HM Treasury</p></div><div class="offgrid reveal" id="offGrid"></div></div></section>' : '') +
 
       '<section class="sec sec--last" id="news"><div class="wrap">' +
-      '<div class="sec__head reveal"><h2 class="h2">Fresh from the newsroom</h2><a class="btn" href="trends.html">See what is trending</a></div>' +
+      '<div class="sec__head reveal"><h2 class="h2">' + F.copy('Market news', 'Fresh from the newsroom') + '</h2><a class="btn" href="trends.html">See what is trending</a></div>' +
       '<div class="cards reveal" id="cards"></div><p class="foot-note" id="newsFoot"></p></div></section>';
 
     fillQuotes('tileGrid', cfg.tiles, tileHTML);
@@ -169,12 +183,14 @@
       var mood = F.mood(scope);
       if (mood) {
         var up = scope.filter(function (s) { return F.quotes[s].price != null && F.quotes[s].pct > 0; }).length;
-        $('bubbleMood').textContent = mood.label;
+        $('bubbleMood').textContent = F.view === 'pro' ? 'Market breadth' : mood.label;
         var best = m.winners[0];
-        $('bubbleLine').textContent = up + ' of ' + scope.length + ' up' + (best ? '. Biggest fish: ' + best.sym + ' ' + F.fmtPct(best.pct) : '') + '.';
+        $('bubbleLine').textContent = F.view === 'pro'
+          ? up + ' of ' + scope.length + ' instruments are higher' + (best ? '. Leading: ' + best.sym + ' ' + F.fmtPct(best.pct) : '') + '.'
+          : up + ' of ' + scope.length + ' up' + (best ? '. Biggest fish: ' + best.sym + ' ' + F.fmtPct(best.pct) : '') + '.';
       }
     };
-    F.on('tick', paintMovers);
+    F.on('tick', paintMovers); F.on('view', paintMovers);
     setInterval(function () { quipI = (quipI + 1) % cfg.quips.length; }, 9000);
 
     var paintFx = function () {
@@ -214,20 +230,21 @@
     document.title = 'FRMM | Crypto';
     main.innerHTML =
       '<section class="phero"><div class="wrap phero__grid">' +
-      '<div class="phero__copy"><p class="sticker">Pond 05 &middot; Crypto</p>' +
+      '<div class="phero__copy"><p class="sticker">' + F.copy('Market 05 · Digital assets', 'Pond 05 · Crypto') + '</p>' +
       '<h1 class="phero__title">Crypto<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
-      '<p class="phero__lede">The market that never closes. Prices in pounds by default, straight from CoinGecko, refreshed every 45 seconds.</p>' +
-      '<div class="seg" id="curSeg" role="tablist" aria-label="Currency"><button type="button" role="tab" data-cur="gbp">&pound; Pounds</button><button type="button" role="tab" data-cur="usd">$ Dollars</button></div></div>' +
-      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('ALWAYS OPEN', page) + '<div class="mascot">' + F.mascot('crypto') + '</div>' +
-      '<div class="bubble"><b id="bubbleMood">Reading the tea leaves</b><span id="bubbleLine">Prices can move fast. Hold on to your claws.</span></div></div>' +
+      '<p class="phero__lede">' + F.copy('A continuously traded digital-asset market. CoinGecko prices are shown in pounds by default and refresh about every 45 seconds.', 'Crypto never closes. See the biggest coins, what they cost and how they moved over 24 hours.') + '</p>' +
+      '<div class="seg" id="curSeg" role="tablist" aria-label="Currency"><button type="button" role="tab" data-cur="gbp">&pound; Pounds</button><button type="button" role="tab" data-cur="usd">$ Dollars</button></div>' +
+      '<aside class="explorer-guide"><b>Quick guide</b><span><strong>Market capitalisation</strong> means the price of one coin multiplied by all coins currently in circulation. It estimates the total value of a cryptocurrency.</span></aside></div>' +
+      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('ALWAYS OPEN', page) + '<div class="mascot">' + F.creature('crypto') + '</div>' +
+      '<div class="bubble"><b id="bubbleMood">' + F.copy('24-hour market breadth', 'Reading the tea leaves') + '</b><span id="bubbleLine">' + F.copy('Waiting for the latest CoinGecko prices.', 'Prices can move fast. Hold on to your claws.') + '</span></div></div>' +
       '</div></section>' +
 
-      '<section class="sec" id="coinsec"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The big shellfish</h2>' + badgeHTML('crypto') + '</div><div class="coins reveal" id="coins"></div></div></section>' +
-      '<section class="sec" id="movers"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Big fish &amp; small fry</h2><p class="sub">Biggest 24 hour movers among the top coins</p></div>' +
-      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>Big fish<small>riding high</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
-      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>Small fry<small>feeling the pressure</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
-      '<section class="sec" id="allcoins"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">The rest of the reef</h2><p class="sub">Next coins by market value</p></div><div class="panel tbl tbl--coins reveal" id="coinTable"></div></div></section>' +
-      '<section class="sec sec--last" id="news"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Fresh from the newsroom</h2><a class="btn" href="trends.html">See what is trending</a></div><div class="cards reveal" id="cards"></div><p class="foot-note" id="newsFoot"></p></div></section>';
+      '<section class="sec" id="coinsec"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('Leading digital assets', 'The big shellfish') + '</h2>' + badgeHTML('crypto') + '</div><div class="coins reveal" id="coins"></div></div></section>' +
+      '<section class="sec" id="movers"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('24-hour movers', 'Big fish & small fry') + '</h2><p class="sub">Biggest 24-hour percentage changes among the leading coins</p></div>' +
+      '<div class="mvgrid reveal"><div class="panel mvcol mvcol--up"><h3><span class="arrow arrow--up"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V3M3 6l4-4 4 4"/></svg></span>' + F.copy('Top gainers', 'Big fish') + '<small>' + F.copy('highest today', 'riding high') + '</small></h3><ol class="mvlist" id="mvUp"></ol></div>' +
+      '<div class="panel mvcol mvcol--down"><h3><span class="arrow arrow--down"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v9M3 8l4 4 4-4"/></svg></span>' + F.copy('Top decliners', 'Small fry') + '<small>' + F.copy('lowest today', 'feeling the pressure') + '</small></h3><ol class="mvlist" id="mvDown"></ol></div></div></div></section>' +
+      '<section class="sec" id="allcoins"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('Extended market list', 'The rest of the reef') + '</h2><p class="sub">' + F.copy('Additional coins ranked by market capitalisation', 'More coins ranked by their total value') + '</p></div><div class="panel tbl tbl--coins reveal" id="coinTable"></div></div></section>' +
+      '<section class="sec sec--last" id="news"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('Digital-asset news', 'Fresh from the newsroom') + '</h2><a class="btn" href="trends.html">See what is trending</a></div><div class="cards reveal" id="cards"></div><p class="foot-note" id="newsFoot"></p></div></section>';
 
     var seg = $('curSeg');
     var paintSeg = function () { each(seg.querySelectorAll('button'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-cur') === F.cur)); }); };
@@ -250,17 +267,19 @@
       }).join('');
       F.clearBindings();
       each(host.querySelectorAll('[data-coin]'), function (elx) { var s = elx.getAttribute('data-coin'); F.bind(elx, function () { return F.coinOf(s); }, { cur: F.curSym }); });
-      $('coinTable').innerHTML = '<div class="row row--head" aria-hidden="true"><span>Name</span><span>Price</span><span>24 hours</span><span>Market value</span></div>' + F.coins.slice(8, 40).map(function (c) {
+      $('coinTable').innerHTML = '<div class="row row--head" aria-hidden="true"><span>Name</span><span>Price</span><span>24 hours</span><span>' + F.copy('Market capitalisation', 'Total coin value') + '</span></div>' + F.coins.slice(8, 40).map(function (c) {
         return '<div class="row"><div class="row__id"><b>' + esc(c.sym.toUpperCase()) + '</b><span>' + esc(c.name) + '</span></div><span class="price">' + esc(F.fmtPrice(c.price, cur)) + '</span><span class="pct ' + F.dir(c.pct) + '">' + F.fmtPct(c.pct) + '</span><span class="cap">' + esc(F.fmtCompact(c.cap, cur)) + '</span></div>';
       }).join('');
       var m = F.coinMovers(3);
       moverList('mvUp', m.winners, 'up', cur, 3); moverList('mvDown', m.losers, 'down', cur, 3);
       var avg = F.coins.slice(0, 20).reduce(function (a, c) { return a + c.pct; }, 0) / Math.min(20, F.coins.length);
-      $('bubbleMood').textContent = avg > 3 ? 'To the moon (maybe)' : avg > 0.3 ? 'Bubbling nicely' : avg > -0.3 ? 'Crab-walking sideways' : avg > -3 ? 'A bit shellshocked' : 'Deep dive';
-      $('bubbleLine').textContent = 'The top 20 are ' + (avg >= 0 ? 'up ' : 'down ') + Math.abs(avg).toFixed(1) + '% on average today.';
+      $('bubbleMood').textContent = F.view === 'pro' ? '24-hour market breadth' : (avg > 3 ? 'To the moon (maybe)' : avg > 0.3 ? 'Bubbling nicely' : avg > -0.3 ? 'Crab-walking sideways' : avg > -3 ? 'A bit shellshocked' : 'Deep dive');
+      $('bubbleLine').textContent = F.view === 'pro'
+        ? 'The leading 20 assets are ' + (avg >= 0 ? 'higher by ' : 'lower by ') + Math.abs(avg).toFixed(1) + '% on average over 24 hours.'
+        : 'The top 20 are ' + (avg >= 0 ? 'up ' : 'down ') + Math.abs(avg).toFixed(1) + '% on average today.';
       paintBadges();
     };
-    F.on('coins', paintCoins); paintCoins();
+    F.on('coins', paintCoins); F.on('view', paintCoins); paintCoins();
     F.on('mode', paintBadges);
 
     var paintNews = function () {
@@ -279,18 +298,19 @@
     document.title = 'FRMM | What is trending';
     main.innerHTML =
       '<section class="phero"><div class="wrap phero__grid">' +
-      '<div class="phero__copy"><p class="sticker">Pond 06 &middot; Trends</p>' +
-      '<h1 class="phero__title">What everyone is saying<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
-      '<p class="phero__lede">A ranked view of the money, economy and world stories in the news over the last day and a half. Longer bars mean a topic is appearing in more coverage. Only reputable outlets and official bodies feed it.</p>' +
-      '<p class="trendstat" id="trendStat">Fishing for headlines...</p></div>' +
-      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('WHAT EVERYONE IS SAYING', page) + '<div class="mascot">' + F.mascot('trends') + '</div>' +
-      '<div class="bubble"><b id="bubbleMood">Something is glowing</b><span id="bubbleLine">Tap a trend card to read the stories.</span></div></div></div></section>' +
+      '<div class="phero__copy"><p class="sticker">' + F.copy('Intelligence 06 · News trends', 'Pond 06 · Trends') + '</p>' +
+      '<h1 class="phero__title">' + F.copy('News coverage monitor', 'What everyone is saying') + '<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
+      '<p class="phero__lede">' + F.copy('A ranked view of financial, economic and global topics appearing across monitored publishers during the last 36 hours. Frequency measures coverage, not importance or truth.', 'See which subjects appear most often in trusted news sources. A longer bar means more stories mentioned that topic.') + '</p>' +
+      '<p class="trendstat" id="trendStat">Fishing for headlines...</p>' +
+      '<aside class="explorer-guide"><b>Quick guide</b><span>This page counts repeated subjects in headlines. A topic can be widely discussed without being the most important—or necessarily correct.</span></aside></div>' +
+      '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('WHAT EVERYONE IS SAYING', page) + '<div class="mascot">' + F.creature('trends') + '</div>' +
+      '<div class="bubble"><b id="bubbleMood">' + F.copy('Leading topic', 'Something is glowing') + '</b><span id="bubbleLine">Tap a trend card to read the stories.</span></div></div></div></section>' +
 
       '<section class="sec" id="trends"><div class="wrap">' +
       '<div class="tools reveal"><div class="legend" id="legend" role="group" aria-label="Filter by category"></div></div>' +
       '<div class="trendgridwrap reveal"><div class="gridbox" id="gridBox"></div><aside class="detail panel" id="detail" aria-live="polite"><p class="detail__hint">Tap a trend card to see the stories behind it, each linking to the outlet that ran it.</p></aside></div></div></section>' +
 
-      '<section class="sec sec--last" id="sources"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Who is talking</h2><p class="sub">Outlets behind the current picture</p></div><div class="srcs reveal" id="srcList"></div>' +
+      '<section class="sec sec--last" id="sources"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">' + F.copy('Source coverage', 'Who is talking') + '</h2><p class="sub">Outlets behind the current picture</p></div><div class="srcs reveal" id="srcList"></div>' +
       '<p class="foot-note reveal">Topics are found by matching headlines against a list of subjects, plus names that several outlets use. It shows what is being covered, not whether it is true or important. Headlines are from BBC News, The Guardian, Sky News, the Financial Times, The Economist, CNBC, Reuters (via Finnhub), the Bank of England, the ONS and HM Treasury.</p></div></section>';
 
     var data = null, cats = {}, sel = null;
@@ -339,14 +359,14 @@
         var newest = F.feed.updated ? F.timeAgo(F.feed.updated) : 'just now';
         $('trendStat').textContent = 'Based on ' + data.items + ' headlines from ' + data.sources.length + ' outlets. Updated ' + newest + '.';
         if (data.nodes[0]) {
-          $('bubbleMood').textContent = data.nodes[0].label + ' is glowing';
+          $('bubbleMood').textContent = F.view === 'pro' ? 'Leading topic: ' + data.nodes[0].label : data.nodes[0].label + ' is glowing';
           $('bubbleLine').textContent = data.nodes[0].mentions + ' stories from ' + data.nodes[0].sources + ' outlets.';
         }
         $('srcList').innerHTML = data.sources.map(function (s) { return '<span class="src' + (s.type === 'official' ? ' src--off' : '') + '"><b>' + esc(s.name) + '</b><em>' + s.n + ' headlines' + (s.type === 'official' ? ' &middot; Official' : '') + '</em></span>'; }).join('');
         draw();
       }, 250);
     };
-    F.on('feeds', update);
+    F.on('feeds', update); F.on('view', update);
     F.reveal();
     F.startFeeds();
     F.watch(F.TICK_SYMS);
@@ -355,25 +375,25 @@
   /* ---------- home ---------- */
   function renderHome() {
     var heroFish = $('heroFish');
-    if (heroFish) heroFish.innerHTML = F.mascot('home');
+    if (heroFish) heroFish.innerHTML = F.creature('home');
 
     var ponds = [
-      { k: 'uk', blurb: 'Sterling, the FTSE crowd and the news that moves them.', sym: 'EWU', label: 'UK stocks' },
-      { k: 'us', blurb: 'Wall Street, the big names, plus gold, oil and the dollar.', sym: 'SPY', label: 'S&P 500' },
-      { k: 'europe', blurb: 'The euro area, Germany, France and the continent\'s giants.', sym: 'FEZ', label: 'Euro Stoxx 50' },
-      { k: 'asia', blurb: 'Tokyo, Hong Kong, Mumbai and the chipmakers.', sym: 'EWJ', label: 'Japan' },
-      { k: 'crypto', blurb: 'The market that never sleeps, priced in pounds.', coin: 'btc', label: 'Bitcoin' },
-      { k: 'trends', blurb: 'A ranked pulse of what everyone is talking about.', label: 'Hot right now' }
+      { k: 'uk', pro: 'UK equities, sterling and official economic releases.', blurb: 'Sterling, the FTSE crowd and the news that moves them.', sym: 'EWU', label: 'UK stocks' },
+      { k: 'us', pro: 'US indices, leading companies and macro market signals.', blurb: 'Wall Street, the big names, plus gold, oil and the dollar.', sym: 'SPY', label: 'S&P 500' },
+      { k: 'europe', pro: 'Euro-area funds and major continental companies.', blurb: 'The euro area, Germany, France and the continent\'s giants.', sym: 'FEZ', label: 'Euro Stoxx 50' },
+      { k: 'asia', pro: 'Asia-Pacific markets, manufacturers and technology leaders.', blurb: 'Tokyo, Hong Kong, Mumbai and the chipmakers.', sym: 'EWJ', label: 'Japan' },
+      { k: 'crypto', pro: 'Digital assets, market capitalisation and 24-hour moves.', blurb: 'The market that never sleeps, priced in pounds.', coin: 'btc', label: 'Bitcoin' },
+      { k: 'trends', pro: 'Ranked financial-news coverage across monitored publishers.', blurb: 'A ranked pulse of what everyone is talking about.', label: 'Hot right now' }
     ];
     var host = $('ponds');
     host.innerHTML = ponds.map(function (p, i) {
       var pg = F.PAGES[p.k];
       return '<a class="pond reveal" href="' + pg.href + '" style="--c:' + pg.color + ';--tilt:' + (((i * 3) % 5) - 2) * 0.5 + 'deg" data-pond="' + p.k + '">' +
-        '<span class="pond__art">' + F.mascot(p.k) + '</span>' +
+        '<span class="pond__art">' + F.creature(p.k) + '</span>' +
         '<span class="pond__num">0' + (i + 1) + '</span><b class="pond__name">' + esc(p.k === 'uk' ? 'The UK' : p.k === 'us' ? 'The US' : pg.label) + '</b>' +
-        '<span class="pond__blurb">' + esc(p.blurb) + '</span>' +
+        '<span class="pond__blurb">' + F.copy(p.pro, p.blurb) + '</span>' +
         '<span class="pond__stat"><span class="pond__label">' + esc(p.label) + '</span>' + (p.k === 'trends' ? '<span class="pond__top" id="pondTop">Scanning the news</span>' : '<span class="price">--</span><span class="pct flat">--</span>') + '</span>' +
-        '<span class="pond__go">Dive in <svg width="26" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg></span></a>';
+        '<span class="pond__go">' + F.copy('Open market', 'Dive in') + ' <svg width="26" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 5h32M28 1l4 4-4 4"/></svg></span></a>';
     }).join('');
     each(host.querySelectorAll('.pond'), function (elx) {
       var k = elx.getAttribute('data-pond'), p = ponds.filter(function (x) { return x.k === k; })[0];
@@ -405,7 +425,7 @@
         var box = $('trendBars');
         if (box) {
           var top = Math.max(1, data.nodes[0].mentions);
-          box.innerHTML = '<h3>Most mentioned topics</h3><ol class="trendbars__list">' +
+          box.innerHTML = '<h3>' + F.copy('Coverage frequency', 'Most mentioned topics') + '</h3><ol class="trendbars__list">' +
             data.nodes.slice(0, 6).map(function (n, i) {
               var w = Math.max(10, Math.round(n.mentions / top * 100));
               return '<li class="trendbar" style="--c:' + F.CATS[n.cat].color + '">' +
@@ -415,9 +435,6 @@
             }).join('') + '</ol>';
         }
 
-        $('topList').innerHTML = data.nodes.slice(0, 5).map(function (n, i) {
-          return '<li><span class="rk">' + (i + 1) + '</span><b>' + esc(n.label) + '</b><em>' + n.mentions + ' stories</em></li>';
-        }).join('');
       }, 300);
     };
     F.on('feeds', paintNews); F.on('feeds', paintTrends); paintNews();
