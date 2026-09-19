@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FRMM | Markets, beneath the surface</title>
-<meta name="description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a web of what the news is talking about.">
+<meta name="description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a ranked view of what the news is talking about.">
 <meta name="theme-color" content="#0a1e47">
 <meta property="og:title" content="FRMM | Markets, beneath the surface">
-<meta property="og:description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a web of what the news is talking about.">
+<meta property="og:description" content="A playful live market tracker for the UK: UK, US, European and Asian markets, crypto in pounds, and a ranked view of what the news is talking about.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
         <span class="badge" data-badge="stocks"><i></i><span>--</span></span>
       </div>
       <div class="hero__art">
-        <img class="hero__fish" src="assets/betta-a.webp" width="1500" height="1552" alt="A red and blue betta fish drifting in dark water" fetchpriority="high">
+        <div class="hero__fish" id="heroFish" role="img" aria-label="A cartoon red and blue betta fish drifting through the market"></div>
         <span class="stk stk--a" data-stick="GBPUSD"><b>&pound;1 in $</b><span class="price">--</span><span class="pct flat">--</span></span>
         <span class="stk stk--b" data-stick="BTC"><b>Bitcoin</b><span class="price">--</span><span class="pct flat">--</span></span>
         <span class="stk stk--c" data-stick="EWU"><b>UK stocks</b><span class="price">--</span><span class="pct flat">--</span></span>
@@ -51,9 +51,9 @@
 
   <section class="sec" id="hot">
     <div class="wrap">
-      <div class="sec__head reveal"><h2 class="h2">What is everyone saying?</h2><a class="btn" href="trends.html">Open the full web</a></div>
+      <div class="sec__head reveal"><h2 class="h2">What is everyone saying?</h2><a class="btn" href="trends.html">See the trend board</a></div>
       <div class="wavesgrid reveal">
-        <div class="panel webbox webbox--mini" id="miniWeb"><p class="empty">Fishing for headlines...</p></div>
+        <div class="panel trendbars" id="trendBars"><p class="empty">Fishing for headlines...</p></div>
         <div class="panel toplist"><h3>Top of the news</h3><ol id="topList"></ol></div>
       </div>
     </div>

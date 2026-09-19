@@ -34,6 +34,22 @@
   function svg(inner) { return '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' + inner + '</svg>'; }
 
   var MASCOTS = {
+    /* Home: a flowing red-and-blue betta, drawn in the same sticker style as the pond mascots */
+    home: function () {
+      return svg(
+        shape('path', 'd="M68 112 C48 78 24 60 10 72 C24 94 24 130 10 150 C26 160 50 144 70 120 Z"', '#3d78ff') +
+        shape('path', 'd="M78 88 C66 58 92 34 126 48 C112 66 102 80 98 94 Z"', '#6d8dff') +
+        shape('path', 'd="M80 138 C70 170 106 194 144 170 C124 158 110 146 100 132 Z"', '#315ed0') +
+        shape('ellipse', 'cx="120" cy="112" rx="66" ry="44"', '#ff6b81') +
+        '<path d="M78 84 C90 100 94 126 82 144" fill="none" stroke="#3d78ff" stroke-width="12" stroke-linecap="round"/>' +
+        '<path d="M96 74 C108 94 112 130 100 150" fill="none" stroke="#5f80ff" stroke-width="8" stroke-linecap="round" opacity=".95"/>' +
+        '<ellipse cx="124" cy="137" rx="38" ry="14" fill="#ff9caf" opacity=".55"/>' +
+        eye(148, 101, 13, 3) +
+        '<circle cx="140" cy="122" r="6" fill="#ffb3bf" opacity=".85"/>' +
+        '<path d="M154 126 Q166 132 176 124" fill="none" stroke="#7a2338" stroke-width="4" stroke-linecap="round"/>' +
+        '<g fill="' + CREAM + '" opacity=".62"><circle cx="108" cy="98" r="3.5"/><circle cx="118" cy="88" r="3"/><circle cx="124" cy="108" r="3.5"/><circle cx="106" cy="122" r="3"/></g>'
+      );
+    },
     /* UK: a plump red fish in a bowler hat, with a moustache and a brolly */
     uk: function () {
       return svg(

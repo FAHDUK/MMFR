@@ -281,22 +281,20 @@
       '<section class="phero"><div class="wrap phero__grid">' +
       '<div class="phero__copy"><p class="sticker">Pond 06 &middot; Trends</p>' +
       '<h1 class="phero__title">What everyone is saying<svg class="squig" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c12-9 20 9 32 0s20 9 32 0 20 9 32 0 20 9 32 0 20 9 32 0 20 9 34 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></h1>' +
-      '<p class="phero__lede">A living map of the money, economy and world stories in the news over the last day and a half. Bigger bubbles mean more stories. Lines join topics that turn up in the same headline. Only reputable outlets and official bodies feed it.</p>' +
+      '<p class="phero__lede">A ranked view of the money, economy and world stories in the news over the last day and a half. Longer bars mean a topic is appearing in more coverage. Only reputable outlets and official bodies feed it.</p>' +
       '<p class="trendstat" id="trendStat">Fishing for headlines...</p></div>' +
       '<div class="phero__art"><div class="phero__blob" aria-hidden="true"></div>' + seal('WHAT EVERYONE IS SAYING', page) + '<div class="mascot">' + F.mascot('trends') + '</div>' +
-      '<div class="bubble"><b id="bubbleMood">Something is glowing</b><span id="bubbleLine">Tap a bubble to read the stories.</span></div></div></div></section>' +
+      '<div class="bubble"><b id="bubbleMood">Something is glowing</b><span id="bubbleLine">Tap a trend card to read the stories.</span></div></div></div></section>' +
 
-      '<section class="sec" id="web"><div class="wrap">' +
-      '<div class="tools reveal"><div class="seg" id="viewSeg" role="tablist" aria-label="View"><button type="button" role="tab" data-view="web" aria-selected="true">The web</button><button type="button" role="tab" data-view="grid" aria-selected="false">The grid</button></div>' +
-      '<div class="legend" id="legend" role="group" aria-label="Filter by category"></div></div>' +
-      '<div class="webwrap reveal"><div class="webbox panel" id="webBox"></div><aside class="detail panel" id="detail" aria-live="polite"><p class="detail__hint">Tap a bubble or a tile to see the stories behind it, each linking to the outlet that ran it.</p></aside></div>' +
-      '<div class="gridbox reveal" id="gridBox" hidden></div></div></section>' +
+      '<section class="sec" id="trends"><div class="wrap">' +
+      '<div class="tools reveal"><div class="legend" id="legend" role="group" aria-label="Filter by category"></div></div>' +
+      '<div class="trendgridwrap reveal"><div class="gridbox" id="gridBox"></div><aside class="detail panel" id="detail" aria-live="polite"><p class="detail__hint">Tap a trend card to see the stories behind it, each linking to the outlet that ran it.</p></aside></div></div></section>' +
 
       '<section class="sec sec--last" id="sources"><div class="wrap"><div class="sec__head reveal"><h2 class="h2">Who is talking</h2><p class="sub">Outlets behind the current picture</p></div><div class="srcs reveal" id="srcList"></div>' +
       '<p class="foot-note reveal">Topics are found by matching headlines against a list of subjects, plus names that several outlets use. It shows what is being covered, not whether it is true or important. Headlines are from BBC News, The Guardian, Sky News, the Financial Times, The Economist, CNBC, Reuters (via Finnhub), the Bank of England, the ONS and HM Treasury.</p></div></section>';
 
-    var data = null, view = 'web', cats = {}, webApi = null, sel = null;
-    var webBox = $('webBox'), detail = $('detail'), gridBox = $('gridBox');
+    var data = null, cats = {}, sel = null;
+    var detail = $('detail'), gridBox = $('gridBox');
     Object.keys(F.CATS).forEach(function (k) { cats[k] = true; });
 
     var legend = $('legend');
@@ -307,43 +305,48 @@
       b.classList.toggle('is-on', cats[k]); b.setAttribute('aria-pressed', String(cats[k]));
       draw();
     });
-    $('viewSeg').addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) return;
-      view = b.getAttribute('data-view');
-      each($('viewSeg').querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', String(x === b)); });
-      draw();
-    });
 
     function pick(n) {
       sel = n;
       detail.innerHTML = F.topicDetail(n, data);
       each(detail.querySelectorAll('.chip'), function (c) {
-        c.addEventListener('click', function () { var t = data.nodes.find(function (x) { return x.id === c.getAttribute('data-id'); }); if (t) { pick(t); if (webApi) webApi.select(t.id); } });
+        c.addEventListener('click', function () {
+          var t = data.nodes.find(function (x) { return x.id === c.getAttribute('data-id'); });
+          if (t) pick(t);
+        });
       });
       if (window.innerWidth < 900) detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+
     function draw() {
       if (!data) return;
-      var web = view === 'web';
-      $('webBox').parentNode.hidden = !web; gridBox.hidden = web;
-      if (web) { webApi = F.renderWeb(webBox, data, { cats: cats, onSelect: pick }); if (sel && webApi) webApi.select(sel.id); }
-      else F.renderGrid(gridBox, data, { cats: cats, onSelect: function (n) { pick(n); $('webBox').parentNode.hidden = false; gridBox.hidden = true; view = 'web'; each($('viewSeg').querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', String(x.getAttribute('data-view') === 'web')); }); webApi = F.renderWeb(webBox, data, { cats: cats, onSelect: pick }); webApi && webApi.select(n.id); } });
+      F.renderGrid(gridBox, data, { cats: cats, onSelect: pick });
+      if (sel && cats[sel.cat] === false) {
+        sel = null;
+        detail.innerHTML = '<p class="detail__hint">Tap a trend card to see the stories behind it, each linking to the outlet that ran it.</p>';
+      }
     }
+
     var t = null;
     var update = function () {
       clearTimeout(t);
       t = setTimeout(function () {
-        if (!F.feed.items.length) { if (F.feed.status === 'error') $('trendStat').textContent = 'The newsroom feeds are not answering right now. Try again in a minute.'; return; }
+        if (!F.feed.items.length) {
+          if (F.feed.status === 'error') $('trendStat').textContent = 'The newsroom feeds are not answering right now. Try again in a minute.';
+          return;
+        }
         data = F.topicsFromFeed({ max: 32 });
         var newest = F.feed.updated ? F.timeAgo(F.feed.updated) : 'just now';
         $('trendStat').textContent = 'Based on ' + data.items + ' headlines from ' + data.sources.length + ' outlets. Updated ' + newest + '.';
-        if (data.nodes[0]) { $('bubbleMood').textContent = data.nodes[0].label + ' is glowing'; $('bubbleLine').textContent = data.nodes[0].mentions + ' stories from ' + data.nodes[0].sources + ' outlets.'; }
+        if (data.nodes[0]) {
+          $('bubbleMood').textContent = data.nodes[0].label + ' is glowing';
+          $('bubbleLine').textContent = data.nodes[0].mentions + ' stories from ' + data.nodes[0].sources + ' outlets.';
+        }
         $('srcList').innerHTML = data.sources.map(function (s) { return '<span class="src' + (s.type === 'official' ? ' src--off' : '') + '"><b>' + esc(s.name) + '</b><em>' + s.n + ' headlines' + (s.type === 'official' ? ' &middot; Official' : '') + '</em></span>'; }).join('');
         draw();
       }, 250);
     };
     F.on('feeds', update);
-    var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (data && view === 'web') draw(); }, 300); });
     F.reveal();
     F.startFeeds();
     F.watch(F.TICK_SYMS);
@@ -351,13 +354,16 @@
 
   /* ---------- home ---------- */
   function renderHome() {
+    var heroFish = $('heroFish');
+    if (heroFish) heroFish.innerHTML = F.mascot('home');
+
     var ponds = [
       { k: 'uk', blurb: 'Sterling, the FTSE crowd and the news that moves them.', sym: 'EWU', label: 'UK stocks' },
       { k: 'us', blurb: 'Wall Street, the big names, plus gold, oil and the dollar.', sym: 'SPY', label: 'S&P 500' },
       { k: 'europe', blurb: 'The euro area, Germany, France and the continent\'s giants.', sym: 'FEZ', label: 'Euro Stoxx 50' },
       { k: 'asia', blurb: 'Tokyo, Hong Kong, Mumbai and the chipmakers.', sym: 'EWJ', label: 'Japan' },
       { k: 'crypto', blurb: 'The market that never sleeps, priced in pounds.', coin: 'btc', label: 'Bitcoin' },
-      { k: 'trends', blurb: 'A living web of what everyone is talking about.', label: 'Hot right now' }
+      { k: 'trends', blurb: 'A ranked pulse of what everyone is talking about.', label: 'Hot right now' }
     ];
     var host = $('ponds');
     host.innerHTML = ponds.map(function (p, i) {
@@ -387,18 +393,31 @@
       var list = F.feed.items.filter(function (it) { return it.type !== 'official'; }).slice(0, 6);
       $('cards').innerHTML = list.map(cardHTML).join('') || '<p class="empty">' + (F.feed.status === 'error' ? 'The newsroom feeds are not answering right now.' : 'Fishing for headlines...') + '</p>';
     };
-    var webT = null, webDone = false;
+    var trendT = null;
     var paintTrends = function () {
-      clearTimeout(webT);
-      webT = setTimeout(function () {
+      clearTimeout(trendT);
+      trendT = setTimeout(function () {
         if (F.feed.items.length < 20) return;
         var data = F.topicsFromFeed({ max: 16 });
         if (!data.nodes.length) return;
         $('pondTop') && ($('pondTop').textContent = data.nodes[0].label);
-        var box = $('miniWeb'); if (!box) return;
-        F.renderWeb(box, data, { compact: true, maxNodes: window.innerWidth < 640 ? 10 : 14, uid: 'h', onSelect: function () { location.href = 'trends.html'; } });
-        $('topList').innerHTML = data.nodes.slice(0, 5).map(function (n, i) { return '<li><span class="rk">' + (i + 1) + '</span><b>' + esc(n.label) + '</b><em>' + n.mentions + ' stories</em></li>'; }).join('');
-        webDone = true;
+
+        var box = $('trendBars');
+        if (box) {
+          var top = Math.max(1, data.nodes[0].mentions);
+          box.innerHTML = '<h3>Most mentioned topics</h3><ol class="trendbars__list">' +
+            data.nodes.slice(0, 6).map(function (n, i) {
+              var w = Math.max(10, Math.round(n.mentions / top * 100));
+              return '<li class="trendbar" style="--c:' + F.CATS[n.cat].color + '">' +
+                '<span class="trendbar__rank">' + (i + 1) + '</span>' +
+                '<span class="trendbar__label"><b>' + esc(n.label) + '</b><em>' + n.mentions + ' stories</em></span>' +
+                '<span class="trendbar__track" aria-hidden="true"><i style="width:' + w + '%"></i></span></li>';
+            }).join('') + '</ol>';
+        }
+
+        $('topList').innerHTML = data.nodes.slice(0, 5).map(function (n, i) {
+          return '<li><span class="rk">' + (i + 1) + '</span><b>' + esc(n.label) + '</b><em>' + n.mentions + ' stories</em></li>';
+        }).join('');
       }, 300);
     };
     F.on('feeds', paintNews); F.on('feeds', paintTrends); paintNews();
