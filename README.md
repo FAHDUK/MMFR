@@ -1,58 +1,45 @@
-# FRMM
+# FRMM: Markets, beneath the surface
 
-**Markets, beneath the surface.** A UK-flavoured market tracker with a deep-sea identity and two audience views. Plain HTML, CSS and JavaScript, no build step.
+A static site (plain HTML, CSS and JavaScript) for GitHub Pages. UK, US, Europe, Asia and Crypto pages, each with the top 50 companies or coins, movers, index charts and currency conversions. One theme: dark.
 
-## Pro and Explore views
+Nothing to build. Open `index.html` through a web server (or GitHub Pages). Opening the file straight from disk works for the demo numbers, but browsers block live data from `file://`.
 
-The header switch changes the whole presentation without duplicating the site:
+## Where the numbers come from
 
-- **Pro** is the default. It uses photorealistic fish, restrained financial styling, denser tables and more precise terminology.
-- **Explore** uses the original cartoon creatures, shorter explanations, translated financial terms and fewer rows/cards at once.
-
-The selected view is stored in the visitor's browser and follows them across every page. Both views use exactly the same underlying price and news data. Live, last-close, connecting and demonstration states are always labelled; Explore also shows a short plain-English explanation.
-
-## Pages
-
-| Page | What it shows |
-| --- | --- |
-| `index.html` | Home: choose a market, ranked news coverage and top headlines |
-| `uk.html` | UK shares (via US-listed proxies), sterling corner, the official desk (Bank of England, ONS, HM Treasury), UK news |
-| `us.html` | Wall Street indices, big names, gold, oil, dollar, bonds |
-| `europe.html` | Euro area funds and continental giants |
-| `asia.html` | Japan, China, Hong Kong, India and regional giants |
-| `crypto.html` | Top coins in pounds or dollars, with 7 day sparklines |
-| `trends.html` | A ranked grid of topics dominating the news, each linking to the original stories |
-
-## Run it
-
-Open `index.html`, or serve the folder:
-
-```bash
-python3 -m http.server 8000
-```
-
-## Data sources
-
-| Data | Source | Key |
+| What | Source | Key needed |
 | --- | --- | --- |
-| Shares, ETFs, ADRs | Finnhub (free plan, US-listed only) | Yes, in `js/config.js` |
-| Sterling exchange rates | ECB reference rates via frankfurter.dev | No |
-| Crypto | CoinGecko | No |
-| Headlines | BBC News, The Guardian, Sky News, Financial Times, The Economist, CNBC, Bank of England, ONS, HM Treasury (RSS via rss2json), plus Reuters and others through Finnhub market news | No |
+| Shares and indices | Yahoo Finance, through your own Cloudflare Worker | No key. See below |
+| Crypto | CoinGecko public API | No |
+| Currency conversions | Frankfurter (European Central Bank rates) | No |
+| Headlines and trends | BBC, Guardian, Sky, FT, Economist, CNBC, Bank of England, CoinDesk, Cointelegraph RSS, read through rss2json | No |
 
-UK, European and Asian markets are followed through US-listed funds and company listings, so those prices are in dollars. Direct London prices need a paid data plan.
+Until `WORKER_URL` is set, shares and indices show demo numbers and the badge in the top strip says **Demo data**. Crypto and currencies go live straight away.
 
-## How the trend ranking works
+## Turn on live shares (about 10 minutes, free)
 
-`js/trends.js` matches headlines from the last 36 hours against a list of about 40 topics and adds names that several outlets mention. The interface ranks topics by story count. It shows what is being covered, not whether it is important or true.
+Yahoo does not issue keys and blocks requests from web pages, so a tiny relay does the asking for the site.
 
-## The Finnhub key
+1. Make a free account at <https://dash.cloudflare.com>.
+2. Go to **Workers and Pages**, then **Create**, then **Create Worker**. Name it `frmm-yahoo` and press **Deploy**.
+3. Press **Edit code**, delete what is there, paste in the whole of `worker/worker.js`, then **Deploy**.
+4. Copy the address it gives you, for example `https://frmm-yahoo.your-name.workers.dev`. Visit `/health` on it to check it says `ok`, then `/q?s=AAPL` to see a price.
+5. Open `js/config.js` and paste that address into `WORKER_URL`. Commit. Refresh the site. The badge should change to **Live, delayed**.
 
-The key is in `js/config.js`, so anyone can see it. It is a free key, and the free plan allows 60 calls a minute, shared by every visitor. If it is misused, regenerate it on finnhub.io. Visitors can also paste their own key from the menu; it stays in their browser.
+If the site is served from anywhere other than `fahduk.github.io` or `fahd.uk`, add the address in the Worker under **Settings, Variables**, as `ALLOWED_ORIGINS` (comma separated, for example `https://example.com`).
+
+The Worker caches every answer for about a minute, so the free plan (100,000 requests a day) is plenty for a personal site.
+
+## Things worth knowing
+
+- This uses Yahoo's unofficial chart endpoint. It is free and delayed (often 15 minutes for London), it can change or break without notice, and Yahoo's terms limit it to personal use. If FRMM becomes a public product, move to a licensed feed (Financial Modeling Prep, EODHD or Twelve Data are the usual choices) and only `worker/worker.js` needs to change.
+- Any symbol Yahoo does not recognise shows `n/a` rather than a made-up number. The FTSE index symbols (`^FTSE`, `^FTMC`, `^FTLC`, `^FTAS`, `^FTAI`) are the ones to check first; edit them in `js/data.js` if one shows `n/a`.
+- Asia's conversion strip uses the yen (¥100). Change it in `F.CONV.asia` in `js/data.js` if you prefer another currency.
+- Nothing secret lives in the site. The old Finnhub key is no longer used, so you can revoke it.
 
 ## Files
 
-`css/styles.css` contains both view systems. `js/core.js` stores the selected view, helpers and cache. `js/markets.js` handles stock quotes and market hours. `js/data.js` handles exchange rates and crypto. `js/feeds.js` handles news sources. `js/trends.js` finds and ranks topics. `js/ui.js` builds the header, switch, ticker, creatures and footer. `js/page.js` builds each page. `assets/pro/` contains the optimised photorealistic fish used by Pro view.
-
-
-live site
+- `index.html`, `css/app.css`: page shell and the dark theme (fonts are self-hosted so every phone draws the same letters).
+- `js/config.js`: the one setting, `WORKER_URL`.
+- `js/data.js`: the top 50 for each region (Yahoo symbol, name, sector, exchange), indices, conversions, news sources and topics.
+- `js/core.js`, `js/live.js`, `js/views.js`, `js/app.js`: helpers, data loading, pages and router.
+- `worker/worker.js`: the Cloudflare Worker.

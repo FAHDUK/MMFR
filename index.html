@@ -3,79 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>try{document.documentElement.setAttribute('data-view',localStorage.getItem('frmm.view')==='explore'?'explore':'pro')}catch(e){document.documentElement.setAttribute('data-view','pro')}</script>
 <title>FRMM | Markets, beneath the surface</title>
-<meta name="description" content="A dual-view market dashboard for UK, US, European and Asian markets, crypto and financial-news trends.">
-<meta name="theme-color" content="#0a1e47">
-<meta property="og:title" content="FRMM | Markets, beneath the surface">
-<meta property="og:description" content="A dual-view market dashboard for UK, US, European and Asian markets, crypto and financial-news trends.">
-<meta property="og:type" content="website">
+<meta name="description" content="UK, US, Europe, Asia and crypto markets in one calm place. Prices, movers, the top 50 companies and what everyone is talking about.">
+<meta name="theme-color" content="#0d0824">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&display=swap">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="preload" href="assets/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<script defer src="js/config.js"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/live.js"></script>
+<script defer src="js/views.js"></script>
+<script defer src="js/app.js"></script>
 </head>
-<body data-page="home">
-<a class="skip" href="#main">Skip to the content</a>
+<body>
+<div class="sea" aria-hidden="true"><div class="sea__water"></div><div class="sea__glow"></div><div class="sky" id="sky"></div></div>
 
-<main id="main">
-  <section class="hero">
-    <div class="hero__glow" aria-hidden="true"></div>
-    <div class="wrap hero__grid">
-      <div class="hero__copy">
-        <p class="sticker"><span class="copy copy--pro">Global markets · UK perspective</span><span class="copy copy--explore">Live markets · Made in the UK</span></p>
-        <h1 class="hero__word">FRMM</h1>
-        <p class="hero__tag">Markets, beneath the surface.</p>
-        <p class="hero__lede"><span class="copy copy--pro">Market prices, key movers and the coverage shaping sentiment across global regions and digital assets.</span><span class="copy copy--explore">Prices, big movers and the stories behind them, from London to Tokyo. Pick a pond, or see what everyone is talking about.</span></p>
-        <aside class="explorer-guide"><b>Start here</b><span>Choose a market below. Green means a price increased; red means it decreased. The status label tells you whether prices are live, from the last close or demonstration data.</span></aside>
-        <div class="hero__cta">
-          <a class="btn btn--solid" href="#ponds"><span class="copy copy--pro">Explore markets</span><span class="copy copy--explore">Pick your pond</span></a>
-          <a class="btn" href="trends.html">What is trending</a>
-        </div>
-        <span class="badge" data-badge="stocks"><i></i><span class="badge__state">--</span><small class="badge__help"></small></span>
-      </div>
-      <div class="hero__art">
-        <div class="hero__fish" id="heroFish" role="img" aria-label="A fish representing the selected FRMM view"></div>
-        <span class="stk stk--a" data-stick="GBPUSD"><b>&pound;1 in $</b><span class="price">--</span><span class="pct flat">--</span></span>
-        <span class="stk stk--b" data-stick="BTC"><b>Bitcoin</b><span class="price">--</span><span class="pct flat">--</span></span>
-        <span class="stk stk--c" data-stick="EWU"><b>UK stocks</b><span class="price">--</span><span class="pct flat">--</span></span>
-      </div>
-    </div>
-  </section>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="#/" aria-label="FRMM home"><svg viewBox="0 0 30 22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M2 6c4-5 7-5 11 0s7 5 11 0 3-2 4-1"/><path d="M2 12c4-5 7-5 11 0s7 5 11 0 3-2 4-1" opacity=".65"/><path d="M2 18c4-5 7-5 11 0s7 5 11 0 3-2 4-1" opacity=".35"/></svg>FRMM</a>
+    <nav class="nav" id="nav" aria-label="Markets"></nav>
+  </div>
+  <div class="strip"><span class="badge demo" id="badge"><i class="dot"></i>Loading</span><div class="mq"><div class="mq__t" id="stripT" style="--dur:80s"></div></div></div>
+</header>
 
-  <section class="sec" id="ponds-sec">
-    <div class="wrap">
-      <div class="sec__head reveal"><h2 class="h2" id="ponds-h"><span class="copy copy--pro">Market coverage</span><span class="copy copy--explore">Pick your pond</span></h2><p class="sub"><span class="copy copy--pro">Regional markets, digital assets and a monitored financial-news view.</span><span class="copy copy--explore">Each market has its own page, colour and creature.</span></p></div>
-      <div class="pondgrid" id="ponds"></div>
-    </div>
-  </section>
+<main id="app"><noscript><div class="wrap"><p class="note">FRMM needs JavaScript to show live prices.</p></div></noscript></main>
 
-  <section class="sec" id="hot">
-    <div class="wrap">
-      <div class="sec__head reveal"><h2 class="h2"><span class="copy copy--pro">Financial-news coverage</span><span class="copy copy--explore">What is everyone saying?</span></h2><a class="btn" href="trends.html">See the trend board</a></div>
-      <div class="wavesgrid reveal">
-        <div class="panel trendbars" id="trendBars"><p class="empty">Fishing for headlines...</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec sec--last" id="news">
-    <div class="wrap">
-      <div class="sec__head reveal"><h2 class="h2"><span class="copy copy--pro">Market news</span><span class="copy copy--explore">Fresh from the newsroom</span></h2></div>
-      <div class="cards reveal" id="cards"></div>
-    </div>
-  </section>
-</main>
-
-<noscript><p style="position:relative;z-index:5;padding:120px 24px 24px;text-align:center;color:#fff">FRMM needs JavaScript to fetch live prices and headlines. Please turn it on and reload.</p></noscript>
-<script src="js/config.js"></script>
-<script src="js/core.js"></script>
-<script src="js/markets.js"></script>
-<script src="js/data.js"></script>
-<script src="js/feeds.js"></script>
-<script src="js/trends.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/page.js"></script>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <b>FRMM</b>
+    <a href="#/uk">UK</a><a href="#/us">US</a><a href="#/europe">Europe</a><a href="#/asia">Asia</a><a href="#/crypto">Crypto</a>
+    <span class="push" id="footNote">Information only, not financial advice. Prices may be delayed.</span>
+  </div>
+</footer>
 </body>
 </html>
